@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Banner Forge</title>
+<meta name="description" content="Turn any website screenshot into a project banner. Runs entirely in your browser.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon/icon-192.png">
+<link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
+<meta name="theme-color" content="#14141a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0c10; --panel:#14141a; --panel2:#1b1b23; --line:#2a2a34;
+  --text:#ececf1; --muted:#9a9aa8; --accent:#8b5cf6;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+header .brand{display:flex;align-items:center;gap:10px}
+header .logo{width:34px;height:34px;border-radius:9px;background:#fff;padding:4px;display:block}
+header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+header .sp{flex:1}
+button,.btn{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover,.btn:hover{border-color:#44445a}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{filter:brightness(1.1)}
+main{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:calc(100% - 57px)}
+#stage{padding:20px;overflow:auto;display:flex;flex-direction:column;gap:12px;align-items:center}
+#wrap{width:100%;max-width:1200px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:
+  conic-gradient(#1a1a20 25%,#15151a 0 50%,#1a1a20 0 75%,#15151a 0) 0 0/20px 20px;line-height:0}
+#cv{width:100%;height:auto;display:block;touch-action:none}
+#hint{color:var(--muted);font-size:12.5px;text-align:center;max-width:720px}
+aside{border-left:1px solid var(--line);background:var(--panel);overflow:auto}
+details{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;user-select:none}
+summary::after{content:"+";color:var(--muted)}
+details[open] summary::after{content:"–"}
+.body{padding:2px 16px 16px;display:grid;gap:11px}
+.f{display:grid;gap:4px}
+.f label,.row label{font-size:12px;color:var(--muted)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit}
+textarea{resize:vertical}
+input[type=color]{width:46px;height:28px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.rg{display:grid;grid-template-columns:1fr 44px;gap:8px;align-items:center}
+.rg output{font-size:12px;color:var(--muted);text-align:right}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{padding:5px 10px;font-size:12px}
+#drop{border:1.5px dashed #3a3a4a;border-radius:10px;padding:16px;text-align:center;color:var(--muted);cursor:pointer}
+#drop:hover,#drop.over{border-color:var(--accent);color:var(--text)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:900px){
+  main{grid-template-columns:1fr;height:auto}
+  aside{border-left:0;border-top:1px solid var(--line)}
+  header{position:static}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img class="logo" src="icon/logo.png" alt="" width="34" height="34">
+    <h1>Banner Forge</h1>
+  </div>
+  <div class="sp"></div>
+  <button id="btnReset" title="Reset everything to defaults">Reset</button>
+  <button id="btnSaveJson" title="Download your settings as a JSON file">Save settings</button>
+  <label class="btn" for="jsonIn">Load settings</label>
+  <input id="jsonIn" type="file" accept=".json,application/json" hidden>
+  <button id="btnCopy">Copy PNG</button>
+  <button id="btnJpg">Download JPG</button>
+  <button id="btnPng" class="primary">Download PNG</button>
+</header>
+<main>
+  <section id="stage">
+    <div id="wrap"><canvas id="cv"></canvas></div>
+    <div id="hint">Drag the browser window on the preview to move it. You can also drop or paste (Ctrl/Cmd+V) a screenshot anywhere on this page.</div>
+  </section>
+  <aside id="panel">
+    <details open>
+      <summary>Screenshot</summary>
+      <div class="body">
+        <div id="drop">Click, drop or paste a screenshot here<input id="fileIn" type="file" accept="image/*" hidden></div>
+        <button id="btnClearImg">Remove screenshot</button>
+      </div>
+    </details>
+  </aside>
+</main>
+
+<script>
+"use strict";
+
+/* ---------- defaults & presets ---------- */
+const DEFAULTS = {
+  size: "1200x630", exportScale: "2",
+  label: "WEB APP / ANIME STREAMING",
+  title: "Eiryui",
+  desc: "Anime discovery and streaming site with trending lists, a release schedule and a personal watchlist",
+  tags: "JavaScript, REST API, Responsive UI",
+  footer: "eiryui.ahshan.com.bd • 2026",
+  font: "Inter", titleWeight: "800", monoLabels: true, textScale: 100,
+  titleSize: 76, descSize: 22, labelSize: 15, tagSize: 15, tagRadius: 6,
+  textX: 6.2, textY: 47, textW: 46,
+  bg: "#0a0a0f", accent: "#8b5cf6", text: "#ffffff", muted: "#a1a1aa",
+  tagBg: "#17171d", tagBorder: "#2c2c36", tagText: "#e4e4e7",
+  glowOn: true, glow: "#7c3aed", glowX: 92, glowY: 8, glowR: 70, glowA: 38,
+  gridOn: true, gridSize: 40, gridA: 4,
+  barOn: true, barW: 6,
+  winX: 56, winY: 18, winW: 52, winH: 60, rot: 0, zoom: 100, panX: 0, panY: 0,
+  frame: true, url: "eiryui.ahshan.com.bd", showUrl: false, dotsMac: false,
+  barH: 30, radius: 12, shadow: 50, accentLine: true,
+  winBg: "#0f0f14", winBorder: "#2a2a35", barBg: "#15151b"
+};
+const COLOR_KEYS = ["bg","accent","text","muted","tagBg","tagBorder","tagText","glow","winBg","winBorder","barBg"];
+const PRESETS = {
+  "Violet": {bg:"#0a0a0f",accent:"#8b5cf6",text:"#ffffff",muted:"#a1a1aa",tagBg:"#17171d",tagBorder:"#2c2c36",tagText:"#e4e4e7",glow:"#7c3aed",winBg:"#0f0f14",winBorder:"#2a2a35",barBg:"#15151b"},
+  "Ember":  {bg:"#0b0b0b",accent:"#ff5a36",text:"#ffffff",muted:"#a3a3a3",tagBg:"#161616",tagBorder:"#2b2b2b",tagText:"#e5e5e5",glow:"#ff4d1f",winBg:"#0d0d0d",winBorder:"#2b2b2b",barBg:"#141414"},
+  "Ocean":  {bg:"#060b14",accent:"#38bdf8",text:"#f8fbff",muted:"#93a4bb",tagBg:"#0e1624",tagBorder:"#1f2c42",tagText:"#dbe7f7",glow:"#0ea5e9",winBg:"#09101b",winBorder:"#1f2c42",barBg:"#0e1624"},
+  "Forest": {bg:"#07100b",accent:"#34d399",text:"#f4fff9",muted:"#8fae9f",tagBg:"#0e1a13",tagBorder:"#1f3328",tagText:"#d5f5e5",glow:"#10b981",winBg:"#09130d",winBorder:"#1f3328",barBg:"#0e1a13"},
+  "Rose":   {bg:"#0f070b",accent:"#fb7185",text:"#fff7f9",muted:"#b19aa2",tagBg:"#1b0e14",tagBorder:"#35202a",tagText:"#f7dde3",glow:"#e11d48",winBg:"#12080d",winBorder:"#35202a",barBg:"#1b0e14"},
+  "Light":  {bg:"#f5f5f7",accent:"#4f46e5",text:"#0f0f14",muted:"#585866",tagBg:"#ffffff",tagBorder:"#d9d9e0",tagText:"#26262f",glow:"#818cf8",winBg:"#ffffff",winBorder:"#d4d4dc",barBg:"#ececf1"}
+};
+const SIZES = [
+  ["1200x630","1200 × 630 – Open Graph / social preview"],
+  ["1280x640","1280 × 640 – GitHub social preview"],
+  ["1200x675","1200 × 675 – Twitter/X card (16:9)"],
+  ["1920x1080","1920 × 1080 – Full HD"],
+  ["1500x500","1500 × 500 – X / Twitter header"],
+  ["1584x396","1584 × 396 – LinkedIn banner"],
+  ["1080x1080","1080 × 1080 – Square"]
+];
+const FONTS = ["Inter","Poppins","Space Grotesk","DM Sans","Outfit"];
+
+/* ---------- control schema ---------- */
+const SCHEMA = [
+  {title:"Text", open:true, fields:[
+    {k:"label",t:"text",l:"Label (small line on top, auto uppercase)"},
+    {k:"title",t:"area",l:"Title",rows:2},
+    {k:"desc",t:"area",l:"Description",rows:3},
+    {k:"tags",t:"text",l:"Tags (comma separated)"},
+    {k:"footer",t:"text",l:"Footer text"}
+  ]},
+  {title:"Colors", open:true, presets:true, fields:[
+    {k:"bg",t:"color",l:"Background"},{k:"accent",t:"color",l:"Accent (label, bar, line)"},
+    {k:"text",t:"color",l:"Title"},{k:"muted",t:"color",l:"Description / footer"},
+    {k:"tagBg",t:"color",l:"Tag fill"},{k:"tagBorder",t:"color",l:"Tag border"},{k:"tagText",t:"color",l:"Tag text"}
+  ]},
+  {title:"Typography", fields:[
+    {k:"font",t:"select",l:"Font",opts:FONTS.map(f=>[f,f])},
+    {k:"titleWeight",t:"select",l:"Title weight",opts:[["600","Semi-bold"],["700","Bold"],["800","Extra-bold"],["900","Black"]]},
+    {k:"monoLabels",t:"check",l:"Monospace label and footer"},
+    {k:"textScale",t:"range",l:"Overall text scale (%)",min:40,max:300,step:1},
+    {k:"titleSize",t:"range",l:"Title size",min:24,max:180,step:1},
+    {k:"descSize",t:"range",l:"Description size",min:10,max:60,step:1},
+    {k:"labelSize",t:"range",l:"Label size",min:8,max:36,step:1},
+    {k:"tagSize",t:"range",l:"Tag size",min:8,max:36,step:1},
+    {k:"tagRadius",t:"range",l:"Tag corner radius",min:0,max:30,step:1}
+  ]},
+  {title:"Text position", fields:[
+    {k:"textX",t:"range",l:"Left edge (% of width)",min:0,max:70,step:.1},
+    {k:"textY",t:"range",l:"Vertical center (% of height)",min:10,max:90,step:.1},
+    {k:"textW",t:"range",l:"Max text width (% of width)",min:15,max:90,step:.5}
+  ]},
+  {title:"Screenshot window", fields:[
+    {k:"winX",t:"range",l:"Left (% of width)",min:-40,max:100,step:.1},
+    {k:"winY",t:"range",l:"Top (% of height)",min:-40,max:100,step:.1},
+    {k:"winW",t:"range",l:"Width (% of width)",min:15,max:150,step:.1},
+    {k:"winH",t:"range",l:"Height (% of height)",min:15,max:150,step:.1},
+    {k:"rot",t:"range",l:"Rotation (degrees)",min:-20,max:20,step:.1},
+    {k:"zoom",t:"range",l:"Image zoom (%)",min:40,max:300,step:1},
+    {k:"panX",t:"range",l:"Image shift horizontal (%)",min:0,max:100,step:1},
+    {k:"panY",t:"range",l:"Image scroll down (%)",min:0,max:100,step:1}
+  ]},
+  {title:"Window frame", fields:[
+    {k:"frame",t:"check",l:"Show browser frame"},
+    {k:"showUrl",t:"check",l:"Show address bar"},
+    {k:"url",t:"text",l:"Address bar text"},
+    {k:"dotsMac",t:"check",l:"Colored window dots"},
+    {k:"accentLine",t:"check",l:"Accent line under the bar"},
+    {k:"barH",t:"range",l:"Bar height",min:16,max:60,step:1},
+    {k:"radius",t:"range",l:"Corner radius",min:0,max:40,step:1},
+    {k:"shadow",t:"range",l:"Shadow",min:0,max:120,step:1},
+    {k:"barBg",t:"color",l:"Bar color"},{k:"winBg",t:"color",l:"Window color"},{k:"winBorder",t:"color",l:"Window border"}
+  ]},
+  {title:"Background", fields:[
+    {k:"glowOn",t:"check",l:"Glow"},
+    {k:"glow",t:"color",l:"Glow color"},
+    {k:"glowX",t:"range",l:"Glow X (%)",min:-20,max:120,step:1},
+    {k:"glowY",t:"range",l:"Glow Y (%)",min:-20,max:120,step:1},
+    {k:"glowR",t:"range",l:"Glow size (%)",min:10,max:150,step:1},
+    {k:"glowA",t:"range",l:"Glow strength (%)",min:0,max:100,step:1},
+    {k:"gridOn",t:"check",l:"Faint grid"},
+    {k:"gridSize",t:"range",l:"Grid spacing",min:16,max:120,step:2},
+    {k:"gridA",t:"range",l:"Grid strength (%)",min:1,max:20,step:1},
+    {k:"barOn",t:"check",l:"Accent bar on the left edge"},
+    {k:"barW",t:"range",l:"Bar width",min:2,max:40,step:1}
+  ]},
+  {title:"Output", open:true, fields:[
+    {k:"size",t:"select",l:"Canvas size",opts:SIZES},
+    {k:"exportScale",t:"select",l:"Export resolution",opts:[["1","1× (as sized)"],["2","2× (sharper, recommended)"],["3","3×"]]}
+  ]}
+];
+
+/* ---------- state ---------- */
+const STORE_KEY = "bannerForge.v1";
+let S = Object.assign({}, DEFAULTS);
+try { const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (saved) S = Object.assign(S, saved); } catch (e) {}
+let img = null;
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const inputs = {};   // key -> {el, out}
+
+function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) {} }
+function dims(){ const [w,h] = S.size.split("x").map(Number); return {W:w, H:h}; }
+
+/* ---------- build the panel ---------- */
+const panel = document.getElementById("panel");
+SCHEMA.forEach(g => {
+  const d = document.createElement("details");
+  if (g.open) d.open = true;
+  const s = document.createElement("summary"); s.textContent = g.title; d.appendChild(s);
+  const body = document.createElement("div"); body.className = "body"; d.appendChild(body);
+  if (g.presets) {
+    const p = document.createElement("div"); p.className = "presets";
+    Object.keys(PRESETS).forEach(name => {
+      const b = document.createElement("button"); b.textContent = name;
+      b.onclick = () => { Object.assign(S, PRESETS[name]); syncUI(); schedule(); persist(); };
+      p.appendChild(b);
+    });
+    body.appendChild(p);
+  }
+  g.fields.forEach(f => body.appendChild(makeField(f)));
+  panel.appendChild(d);
+});
+
+function makeField(f){
+  const wrap = document.createElement("div");
+  const id = "f_" + f.k;
+  if (f.t === "check") {
+    wrap.className = "row";
+    wrap.innerHTML = `<label for="${id}">${f.l}</label><input type="checkbox" id="${id}">`;
+    const el = wrap.querySelector("input");
+    el.onchange = () => update(f.k, el.checked);
+    inputs[f.k] = {el};
+  } else if (f.t === "color") {
+    wrap.className = "row";
+    wrap.innerHTML = `<label for="${id}">${f.l}</label><input type="color" id="${id}">`;
+    const el = wrap.querySelector("input");
+    el.oninput = () => update(f.k, el.value);
+    inputs[f.k] = {el};
+  } else if (f.t === "range") {
+    wrap.className = "f";
+    wrap.innerHTML = `<label for="${id}">${f.l}</label><div class="rg"><input type="range" id="${id}" min="${f.min}" max="${f.max}" step="${f.step}"><output></output></div>`;
+    const el = wrap.querySelector("input"), out = wrap.querySelector("output");
+    el.oninput = () => update(f.k, parseFloat(el.value));
+    inputs[f.k] = {el, out};
+  } else if (f.t === "select") {
+    wrap.className = "f";
+    wrap.innerHTML = `<label for="${id}">${f.l}</label><select id="${id}">${f.opts.map(o => `<option value="${o[0]}">${o[1]}</option>`).join("")}</select>`;
+    const el = wrap.querySelector("select");
+    el.onchange = () => update(f.k, el.value);
+    inputs[f.k] = {el};
+  } else if (f.t === "area") {
+    wrap.className = "f";
+    wrap.innerHTML = `<label for="${id}">${f.l}</label><textarea id="${id}" rows="${f.rows||3}"></textarea>`;
+    const el = wrap.querySelector("textarea");
+    el.oninput = () => update(f.k, el.value);
+    inputs[f.k] = {el};
+  } else {
+    wrap.className = "f";
+    wrap.innerHTML = `<label for="${id}">${f.l}</label><input type="text" id="${id}">`;
+    const el = wrap.querySelector("input");
+    el.oninput = () => update(f.k, el.value);
+    inputs[f.k] = {el};
+  }
+  return wrap;
+}
+
+function syncUI(){
+  for (const k in inputs) {
+    const {el, out} = inputs[k];
+    if (el.type === "checkbox") el.checked = !!S[k];
+    else el.value = S[k];
+    if (out) out.textContent = Math.round(S[k] * 10) / 10;
+  }
+}
+
+function update(k, v){
+  S[k] = v;
+  if (inputs[k] && inputs[k].out) inputs[k].out.textContent = Math.round(v * 10) / 10;
+  if (k === "size") {
+    const {W} = dims();
+    S.textScale = Math.round(W / 1200 * 100);
+    syncUI();
+  }
+  if (k === "font" || k === "titleWeight" || k === "monoLabels") ensureFonts().then(schedule);
+  schedule(); persist();
+}
+
+/* ---------- drawing helpers ---------- */
+function rr(c,x,y,w,h,r){
+  r = Math.max(0, Math.min(r, w/2, h/2));
+  c.beginPath(); c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+}
+function rgba(hex,a){
+  const n = parseInt(hex.replace("#",""),16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
+}
+function setLS(c,px){ if ("letterSpacing" in c) c.letterSpacing = px + "px"; }
+function measureSpaced(c,str,ls){ let w = 0; for (const ch of str) w += c.measureText(ch).width + ls; return w - ls; }
+function drawSpaced(c,str,x,y,ls){ for (const ch of str) { c.fillText(ch,x,y); x += c.measureText(ch).width + ls; } }
+function wrap(c,text,maxW){
+  const out = [];
+  for (const para of text.split("\n")) {
+    const words = para.split(/\s+/).filter(Boolean);
+    if (!words.length) { out.push(""); continue; }
+    let line = words[0];
+    for (let i = 1; i < words.length; i++) {
+      const t = line + " " + words[i];
+      if (c.measureText(t).width <= maxW) line = t; else { out.push(line); line = words[i]; }
+    }
+    out.push(line);
+  }
+  return out;
+}
+function fonts(){
+  const fam = `"${S.font}", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+  const mono = S.monoLabels ? `"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace` : fam;
+  return {fam, mono};
+}
+async function ensureFonts(){
+  try {
+    await Promise.all([
+      document.fonts.load(`${S.titleWeight} 40px "${S.font}"`),
+      document.fonts.load(`400 20px "${S.font}"`),
+      document.fonts.load(`500 14px "${S.font}"`),
+      document.fonts.load(`500 14px "JetBrains Mono"`)
+    ]);
+  } catch (e) {}
+}
+
+/* ---------- main render ---------- */
+function render(c, W, H, scale){
+  c.setTransform(scale,0,0,scale,0,0);
+  c.clearRect(0,0,W,H);
+  c.imageSmoothingEnabled = true; c.imageSmoothingQuality = "high";
+  c.fillStyle = S.bg; c.fillRect(0,0,W,H);
+
+  if (S.glowOn) {
+    const gx = S.glowX/100*W, gy = S.glowY/100*H, r = S.glowR/100*Math.max(W,H);
+    const g = c.createRadialGradient(gx,gy,0,gx,gy,r);
+    g.addColorStop(0, rgba(S.glow, S.glowA/100));
+    g.addColorStop(1, rgba(S.glow, 0));
+    c.fillStyle = g; c.fillRect(0,0,W,H);
+  }
+  if (S.gridOn) {
+    const isLight = luminance(S.bg) > .5;
+    c.strokeStyle = isLight ? `rgba(0,0,0,${S.gridA/100})` : `rgba(255,255,255,${S.gridA/100})`;
+    c.lineWidth = 1; c.beginPath();
+    for (let x = S.gridSize; x < W; x += S.gridSize) { c.moveTo(Math.round(x)+.5,0); c.lineTo(Math.round(x)+.5,H); }
+    for (let y = S.gridSize; y < H; y += S.gridSize) { c.moveTo(0,Math.round(y)+.5); c.lineTo(W,Math.round(y)+.5); }
+    c.stroke();
+  }
+  if (S.barOn) { c.fillStyle = S.accent; c.fillRect(0,0,S.barW,H); }
+
+  drawWindow(c,W,H);
+  drawText(c,W,H);
+}
+function luminance(hex){
+  const n = parseInt(hex.replace("#",""),16);
+  return (0.299*((n>>16)&255) + 0.587*((n>>8)&255) + 0.114*(n&255)) / 255;
+}
+
+function winRect(W,H){
+  return {x:S.winX/100*W, y:S.winY/100*H, w:S.winW/100*W, h:S.winH/100*H};
+}
+
+function drawWindow(c,W,H){
+  const {x,y,w:ww,h:wh} = winRect(W,H);
+  const k = W/1200;
+  const bar = S.frame ? S.barH * k : 0;
+  const r = S.radius * k;
+  c.save();
+  c.translate(x+ww/2, y+wh/2); c.rotate(S.rot*Math.PI/180); c.translate(-ww/2,-wh/2);
+
+  // body + shadow
+  c.save();
+  if (S.shadow > 0) { c.shadowColor = "rgba(0,0,0,.55)"; c.shadowBlur = S.shadow*k; c.shadowOffsetY = S.shadow*k/3; }
+  c.fillStyle = S.winBg; rr(c,0,0,ww,wh,r); c.fill();
+  c.restore();
+
+  // clip to rounded window
+  c.save(); rr(c,0,0,ww,wh,r); c.clip();
+
+  if (S.frame) {
+    c.fillStyle = S.barBg; c.fillRect(0,0,ww,bar);
+    const dotCols = S.dotsMac ? ["#ff5f57","#febc2e","#28c840"] : [S.winBorder,S.winBorder,S.winBorder];
+    const dr = bar*0.17, dy = bar/2;
+    dotCols.forEach((col,i) => { c.fillStyle = col; c.beginPath(); c.arc(bar*0.5 + i*dr*3.2, dy, dr, 0, Math.PI*2); c.fill(); });
+    if (S.showUrl && S.url.trim()) {
+      const fs = bar*0.38;
+      c.font = `400 ${fs}px ${fonts().mono}`;
+      const tw = Math.min(c.measureText(S.url).width + fs*2.4, ww*0.6);
+      const px = (ww - tw)/2, ph = bar*0.62;
+      c.fillStyle = S.winBg; rr(c,px,(bar-ph)/2,tw,ph,ph/2); c.fill();
+      c.fillStyle = S.muted; c.textBaseline = "middle"; c.textAlign = "center";
+      c.fillText(S.url, ww/2, bar/2 + fs*0.04, tw - fs*1.6);
+      c.textAlign = "left";
+    }
+    if (S.accentLine) { c.fillStyle = S.accent; c.fillRect(0,bar-Math.max(1,1.5*k),ww,Math.max(1,1.5*k)); }
+  }
+
+  // content area
+  const cw = ww, ch = wh - bar;
+  c.save(); c.beginPath(); c.rect(0,bar,cw,ch); c.clip();
+  if (img) {
+    const dw = cw*S.zoom/100, dh = dw*img.height/img.width;
+    const ox = (cw-dw)*S.panX/100;
+    const oy = dh > ch ? (ch-dh)*S.panY/100 : 0;
+    c.drawImage(img, ox, bar+oy, dw, dh);
+  } else {
+    const g = c.createLinearGradient(0,bar,cw,bar+ch);
+    g.addColorStop(0, rgba(S.accent,.22)); g.addColorStop(1, rgba(S.glow,.06));
+    c.fillStyle = g; c.fillRect(0,bar,cw,ch);
+    c.fillStyle = S.muted; c.textAlign = "center"; c.textBaseline = "middle";
+    c.font = `500 ${18*k}px ${fonts().fam}`;
+    c.fillText("Upload, drop or paste a screenshot", cw/2, bar+ch/2);
+    c.textAlign = "left";
+  }
+  c.restore();
+  c.restore();
+
+  // border
+  c.lineWidth = Math.max(1,k); c.strokeStyle = S.winBorder;
+  rr(c,.5,.5,ww-1,wh-1,r); c.stroke();
+  c.restore();
+}
+
+function drawText(c,W,H){
+  const k = S.textScale/100;
+  const x = S.textX/100*W, maxW = S.textW/100*W;
+  const {fam, mono} = fonts();
+  c.textAlign = "left"; c.textBaseline = "top";
+  const blocks = [];
+
+  if (S.label.trim()) {
+    const sz = S.labelSize*k, ls = sz*0.2;
+    blocks.push({h:sz*1.2, gap:sz*1.5, draw:y => {
+      c.font = `500 ${sz}px ${mono}`; c.fillStyle = S.accent;
+      drawSpaced(c, S.label.toUpperCase(), x, y, ls);
+    }});
+  }
+  if (S.title.trim()) {
+    const sz = S.titleSize*k, lh = sz*1.05;
+    c.font = `${S.titleWeight} ${sz}px ${fam}`; setLS(c,-sz*0.02);
+    const lines = wrap(c,S.title,maxW); setLS(c,0);
+    blocks.push({h:lines.length*lh, gap:sz*0.22, draw:y => {
+      c.font = `${S.titleWeight} ${sz}px ${fam}`; c.fillStyle = S.text; setLS(c,-sz*0.02);
+      lines.forEach((l,i) => c.fillText(l,x,y+i*lh)); setLS(c,0);
+    }});
+  }
+  if (S.desc.trim()) {
+    const sz = S.descSize*k, lh = sz*1.45;
+    c.font = `400 ${sz}px ${fam}`;
+    const lines = wrap(c,S.desc,maxW);
+    blocks.push({h:lines.length*lh, gap:sz*1.3, draw:y => {
+      c.font = `400 ${sz}px ${fam}`; c.fillStyle = S.muted;
+      lines.forEach((l,i) => c.fillText(l,x,y+i*lh));
+    }});
+  }
+  const tags = S.tags.split(",").map(t => t.trim()).filter(Boolean);
+  if (tags.length) {
+    const sz = S.tagSize*k, padX = sz*0.95, ph = sz*2.3, gap = sz*0.7;
+    c.font = `500 ${sz}px ${fam}`;
+    const rows = []; let row = [], rw = 0;
+    tags.forEach(t => {
+      const tw = c.measureText(t).width + padX*2;
+      if (row.length && rw + gap + tw > maxW) { rows.push(row); row = []; rw = 0; }
+      row.push({t,tw}); rw += (row.length > 1 ? gap : 0) + tw;
+    });
+    rows.push(row);
+    blocks.push({h:rows.length*ph + (rows.length-1)*gap, gap:0, draw:y => {
+      c.font = `500 ${sz}px ${fam}`;
+      rows.forEach((r,ri) => {
+        let tx = x; const ty = y + ri*(ph+gap);
+        r.forEach(({t,tw}) => {
+          c.fillStyle = S.tagBg; rr(c,tx,ty,tw,ph,S.tagRadius*k); c.fill();
+          c.lineWidth = Math.max(1,k); c.strokeStyle = S.tagBorder; rr(c,tx+.5,ty+.5,tw-1,ph-1,S.tagRadius*k); c.stroke();
+          c.fillStyle = S.tagText; c.textBaseline = "middle"; c.fillText(t,tx+padX,ty+ph/2+sz*0.04); c.textBaseline = "top";
+          tx += tw + gap;
+        });
+      });
+    }});
+  }
+
+  const total = blocks.reduce((a,b,i) => a + b.h + (i < blocks.length-1 ? b.gap : 0), 0);
+  let y = S.textY/100*H - total/2;
+  blocks.forEach(b => { b.draw(y); y += b.h + b.gap; });
+
+  if (S.footer.trim()) {
+    const sz = 15*k;
+    c.font = `400 ${sz}px ${mono}`; c.fillStyle = S.muted; c.textBaseline = "bottom";
+    drawSpaced(c, S.footer, x, H - 42*k, sz*0.06);
+    c.textBaseline = "top";
+  }
+}
+
+/* ---------- preview loop ---------- */
+let raf = 0;
+function schedule(){ cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }
+function draw(){
+  const {W,H} = dims();
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  render(ctx,W,H,1);
+}
+
+/* ---------- image input ---------- */
+function loadFile(file){
+  if (!file || !file.type.startsWith("image/")) return;
+  const url = URL.createObjectURL(file);
+  const im = new Image();
+  im.onload = () => { img = im; S.panY = 0; S.panX = 0; S.zoom = 100; syncUI(); schedule(); };
+  im.src = url;
+}
+const drop = document.getElementById("drop"), fileIn = document.getElementById("fileIn");
+drop.onclick = () => fileIn.click();
+fileIn.onchange = () => loadFile(fileIn.files[0]);
+document.getElementById("btnClearImg").onclick = () => { img = null; schedule(); };
+["dragenter","dragover"].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+window.addEventListener("drop", e => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) loadFile(f); });
+window.addEventListener("paste", e => {
+  const items = (e.clipboardData && e.clipboardData.items) || [];
+  for (const it of items) if (it.type.startsWith("image/")) { loadFile(it.getAsFile()); break; }
+});
+
+/* ---------- drag the window on the preview ---------- */
+let drag = null;
+function canvasPoint(e){
+  const r = cv.getBoundingClientRect(), {W,H} = dims();
+  return {x:(e.clientX-r.left)*W/r.width, y:(e.clientY-r.top)*H/r.height};
+}
+function overWindow(p){
+  const {W,H} = dims(), r = winRect(W,H);
+  return p.x >= r.x && p.x <= r.x+r.w && p.y >= r.y && p.y <= r.y+r.h;
+}
+cv.addEventListener("pointerdown", e => {
+  const p = canvasPoint(e);
+  if (!overWindow(p)) return;
+  drag = {p, x:S.winX, y:S.winY}; cv.setPointerCapture(e.pointerId); cv.style.cursor = "grabbing";
+});
+cv.addEventListener("pointermove", e => {
+  const p = canvasPoint(e), {W,H} = dims();
+  if (!drag) { cv.style.cursor = overWindow(p) ? "grab" : "default"; return; }
+  S.winX = Math.round((drag.x + (p.x-drag.p.x)/W*100)*10)/10;
+  S.winY = Math.round((drag.y + (p.y-drag.p.y)/H*100)*10)/10;
+  syncUI(); schedule();
+});
+cv.addEventListener("pointerup", () => { if (drag) { drag = null; cv.style.cursor = "grab"; persist(); } });
+
+/* ---------- export ---------- */
+function slug(){ return (S.title.trim().split("\n")[0] || "banner").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "banner"; }
+async function makeBlob(type){
+  await ensureFonts();
+  const {W,H} = dims(), sc = parseInt(S.exportScale,10) || 1;
+  const c = document.createElement("canvas"); c.width = W*sc; c.height = H*sc;
+  render(c.getContext("2d"),W,H,sc);
+  return new Promise(res => c.toBlob(res, type, .95));
+}
+function download(blob,name){
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+document.getElementById("btnPng").onclick = async () => download(await makeBlob("image/png"), slug()+"-banner.png");
+document.getElementById("btnJpg").onclick = async () => download(await makeBlob("image/jpeg"), slug()+"-banner.jpg");
+document.getElementById("btnCopy").onclick = async (e) => {
+  const b = e.target, old = b.textContent;
+  try { await navigator.clipboard.write([new ClipboardItem({"image/png": await makeBlob("image/png")})]); b.textContent = "Copied"; }
+  catch (err) { b.textContent = "Copy not supported"; }
+  setTimeout(() => b.textContent = old, 1500);
+};
+
+/* ---------- settings file / reset ---------- */
+document.getElementById("btnSaveJson").onclick = () => download(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}), slug()+"-banner-settings.json");
+document.getElementById("jsonIn").onchange = async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const o = JSON.parse(await f.text()); S = Object.assign({}, DEFAULTS, o); syncUI(); ensureFonts().then(schedule); schedule(); persist(); }
+  catch (err) { alert("That file is not a valid settings file."); }
+  e.target.value = "";
+};
+document.getElementById("btnReset").onclick = () => { if (confirm("Reset all settings?")) { S = Object.assign({}, DEFAULTS); syncUI(); ensureFonts().then(schedule); schedule(); persist(); } };
+
+/* ---------- start ---------- */
+syncUI();
+schedule();
+ensureFonts().then(schedule);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+</script>
+</body>
+</html>
