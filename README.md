@@ -57,6 +57,8 @@ Open **Colors**:
 
 ### 5. Position the screenshot
 
+- Under **Screenshot window**, choose **Screenshot preview**: **2D (flat)** or **3D (perspective)**. Each mode remembers its own position and size, so you can switch back and forth.
+- In 3D mode, **turn left / right** and **tilt up / down** rotate the window, **perspective strength** controls how steep the angle looks, and **edge fade** melts the right and bottom edges into the background. The window shadow is hidden while edge fade is on; set the fade to 0 to bring the shadow back.
 - **Drag the browser window** directly on the preview to move it.
 - Open **Screenshot window** for exact control: left and top position, width and height, rotation, image zoom, and the two shift sliders.
 - Use **Image scroll down** to pick which part of a tall screenshot shows, and **Image zoom** to enlarge details.

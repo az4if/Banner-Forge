@@ -113,7 +113,8 @@ const DEFAULTS = {
   glowOn: true, glow: "#7c3aed", glowX: 92, glowY: 8, glowR: 70, glowA: 38,
   gridOn: true, gridSize: 40, gridA: 4,
   barOn: true, barW: 6,
-  view: "2d", rotY: 26, rotX: 3, persp: 70,
+  view: "2d", rotY: 26, rotX: 3, persp: 70, fade: 30,
+  geo: {"3d": {winX: 57, winY: 9, winW: 62, winH: 84, rot: 0}},
   winX: 56, winY: 18, winW: 52, winH: 60, rot: 0, zoom: 100, panX: 0, panY: 0,
   frame: true, url: "azif.me", showUrl: false, dotsMac: false,
   barH: 30, radius: 12, shadow: 50, accentLine: true,
@@ -174,11 +175,12 @@ const SCHEMA = [
     {k:"rotY",t:"range",l:"3D turn left / right (degrees)",min:-60,max:60,step:.5,only:"3d"},
     {k:"rotX",t:"range",l:"3D tilt up / down (degrees)",min:-40,max:40,step:.5,only:"3d"},
     {k:"persp",t:"range",l:"3D perspective strength",min:10,max:100,step:1,only:"3d"},
+    {k:"fade",t:"range",l:"3D edge fade into background (%, hides shadow)",min:0,max:80,step:1,only:"3d"},
     {k:"winX",t:"range",l:"Left (% of width)",min:-40,max:100,step:.1},
     {k:"winY",t:"range",l:"Top (% of height)",min:-40,max:100,step:.1},
     {k:"winW",t:"range",l:"Width (% of width)",min:15,max:150,step:.1},
     {k:"winH",t:"range",l:"Height (% of height)",min:15,max:150,step:.1},
-    {k:"rot",t:"range",l:"Rotation (degrees)",min:-20,max:20,step:.1},
+    {k:"rot",t:"range",l:"Rotation / roll (degrees)",min:-20,max:20,step:.1},
     {k:"zoom",t:"range",l:"Image zoom (%)",min:40,max:300,step:1},
     {k:"panX",t:"range",l:"Image shift horizontal (%)",min:0,max:100,step:1},
     {k:"panY",t:"range",l:"Image scroll down (%)",min:0,max:100,step:1}
@@ -213,9 +215,11 @@ const SCHEMA = [
   ]}
 ];
 
+function fresh(){ return JSON.parse(JSON.stringify(DEFAULTS)); }
+
 /* ---------- state ---------- */
 const STORE_KEY = "bannerForge.v1";
-let S = Object.assign({}, DEFAULTS);
+let S = fresh();
 try { const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (saved) S = Object.assign(S, saved); } catch (e) {}
 let img = null;
 const cv = document.getElementById("cv");
@@ -303,7 +307,14 @@ function syncUI(){
   }
 }
 
+const GEO = ["winX","winY","winW","winH","rot"];
+function switchView(nv){   // each view remembers its own window position and size
+  S.geo = S.geo || {};
+  S.geo[S.view] = Object.fromEntries(GEO.map(g => [g, S[g]]));
+  if (S.geo[nv]) Object.assign(S, S.geo[nv]);
+}
 function update(k, v){
+  if (k === "view" && v !== S.view) switchView(v);
   S[k] = v;
   if (inputs[k] && inputs[k].out) inputs[k].out.textContent = Math.round(v * 10) / 10;
   if (k === "size") {
@@ -362,6 +373,7 @@ async function ensureFonts(){
 
 /* ---------- main render ---------- */
 function render(c, W, H, scale){
+  CUR_SCALE = scale;
   c.setTransform(scale,0,0,scale,0,0);
   c.clearRect(0,0,W,H);
   c.imageSmoothingEnabled = true; c.imageSmoothingQuality = "high";
@@ -396,17 +408,17 @@ function winRect(W,H){
   return {x:S.winX/100*W, y:S.winY/100*H, w:S.winW/100*W, h:S.winH/100*H};
 }
 
-function drawWindow(c,W,H){
-  const {x,y,w:ww,h:wh} = winRect(W,H);
-  const k = W/1200;
+let CUR_SCALE = 1;
+
+/* Paints the window (body, frame, screenshot, border) at 0,0 in the context's current units. */
+function paintWindow(c,ww,wh,k,shadow){
   const bar = S.frame ? S.barH * k : 0;
   const r = S.radius * k;
   c.save();
-  c.translate(x+ww/2, y+wh/2); c.rotate(S.rot*Math.PI/180); c.translate(-ww/2,-wh/2);
 
   // body + shadow
   c.save();
-  if (S.shadow > 0) { c.shadowColor = "rgba(0,0,0,.55)"; c.shadowBlur = S.shadow*k; c.shadowOffsetY = S.shadow*k/3; }
+  if (shadow && S.shadow > 0) { c.shadowColor = "rgba(0,0,0,.55)"; c.shadowBlur = S.shadow*k*CUR_SCALE; c.shadowOffsetY = S.shadow*k/3*CUR_SCALE; }
   c.fillStyle = S.winBg; rr(c,0,0,ww,wh,r); c.fill();
   c.restore();
 
@@ -455,6 +467,120 @@ function drawWindow(c,W,H){
   c.lineWidth = Math.max(1,k); c.strokeStyle = S.winBorder;
   rr(c,.5,.5,ww-1,wh-1,r); c.stroke();
   c.restore();
+}
+
+function drawWindow(c,W,H){
+  const {x,y,w:ww,h:wh} = winRect(W,H);
+  const k = W/1200;
+  if (S.view === "3d") { drawWindow3D(c,W,H,x,y,ww,wh,k); return; }
+  c.save();
+  c.translate(x+ww/2, y+wh/2); c.rotate(S.rot*Math.PI/180); c.translate(-ww/2,-wh/2);
+  paintWindow(c,ww,wh,k,true);
+  c.restore();
+}
+
+/* ---------- 3D mode: perspective projection of the flat window ---------- */
+function project3D(ww,wh){
+  const a = S.rotY*Math.PI/180, b = S.rotX*Math.PI/180, r = S.rot*Math.PI/180;
+  const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b), cr = Math.cos(r), sr = Math.sin(r);
+  const d = Math.max(ww*(4.2 - S.persp*0.035), 1);   // persp 10..100 = weak..strong
+  return (u,v) => {
+    const px = u - ww/2, py = v - wh/2;
+    const x1 = px*ca, z1 = px*sa;               // turn left/right (positive: right side moves away)
+    const y2 = py*cb - z1*sb, z2 = py*sb + z1*cb; // tilt up/down (positive: bottom moves away)
+    const s = d / Math.max(d + z2, d*0.05);       // perspective
+    const X = x1*s, Y = y2*s;
+    return [X*cr - Y*sr, X*sr + Y*cr];            // roll
+  };
+}
+
+function roundedPoly(w,h,r){
+  r = Math.max(0, Math.min(r, w/2, h/2));
+  const pts = [], n = 6;
+  const corner = (cx,cy,a0) => { for (let i = 0; i <= n; i++) { const a = a0 + i*Math.PI/2/n; pts.push([cx + r*Math.cos(a), cy + r*Math.sin(a)]); } };
+  corner(w-r,r,-Math.PI/2); corner(w-r,h-r,0); corner(r,h-r,Math.PI/2); corner(r,r,Math.PI);
+  return pts;
+}
+
+/* draws one texture triangle onto its projected position (affine map per triangle) */
+function texTri(c,tex,p,q,s,e){
+  const [u0,v0,x0,y0] = p, [u1,v1,x1,y1] = q, [u2,v2,x2,y2] = s;
+  const du1 = u1-u0, dv1 = v1-v0, du2 = u2-u0, dv2 = v2-v0, det = du1*dv2 - du2*dv1;
+  if (!det) return;
+  const dx1 = x1-x0, dx2 = x2-x0, dy1 = y1-y0, dy2 = y2-y0;
+  const a = (dx1*dv2 - dx2*dv1)/det, cc = (dx2*du1 - dx1*du2)/det;
+  const b = (dy1*dv2 - dy2*dv1)/det, d  = (dy2*du1 - dy1*du2)/det;
+  const ee = x0 - a*u0 - cc*v0, ff = y0 - b*u0 - d*v0;
+  // grow the clip triangle a hair so neighbours overlap and no seams show
+  const gx = (x0+x1+x2)/3, gy = (y0+y1+y2)/3;
+  const grow = (x,y) => { const dx = x-gx, dy = y-gy, l = Math.hypot(dx,dy) || 1; return [x + dx/l*e, y + dy/l*e]; };
+  const A = grow(x0,y0), B = grow(x1,y1), C = grow(x2,y2);
+  const sx = Math.max(0, Math.floor(Math.min(u0,u1,u2)) - 2), sy = Math.max(0, Math.floor(Math.min(v0,v1,v2)) - 2);
+  const ex = Math.min(tex.width,  Math.ceil(Math.max(u0,u1,u2)) + 2), ey = Math.min(tex.height, Math.ceil(Math.max(v0,v1,v2)) + 2);
+  if (ex <= sx || ey <= sy) return;
+  c.save();
+  c.beginPath(); c.moveTo(A[0],A[1]); c.lineTo(B[0],B[1]); c.lineTo(C[0],C[1]); c.closePath(); c.clip();
+  c.transform(a,b,cc,d,ee,ff);
+  c.drawImage(tex, sx,sy,ex-sx,ey-sy, sx,sy,ex-sx,ey-sy);
+  c.restore();
+}
+
+function drawWindow3D(c,W,H,x,y,ww,wh,k){
+  const scale = CUR_SCALE;
+  const cx = x+ww/2, cy = y+wh/2, P = project3D(ww,wh);
+  const pt = (u,v) => { const p = P(u,v); return [cx+p[0], cy+p[1]]; };
+
+  // 1. paint the flat window into a texture
+  const ts = Math.min(scale*1.5, 4096/Math.max(ww,wh));
+  const tex = document.createElement("canvas");
+  tex.width = Math.max(2,Math.ceil(ww*ts)); tex.height = Math.max(2,Math.ceil(wh*ts));
+  const t = tex.getContext("2d");
+  t.imageSmoothingEnabled = true; t.imageSmoothingQuality = "high";
+  t.setTransform(ts,0,0,ts,0,0);
+  paintWindow(t,ww,wh,k,false);
+
+  // 2. soft shadow behind the projected outline (skipped while edge fade is on)
+  if (S.shadow > 0 && !(S.fade > 0)) {
+    const poly = roundedPoly(ww,wh,S.radius*k).map(p => pt(p[0],p[1]));
+    c.save();
+    c.shadowColor = "rgba(0,0,0,.55)"; c.shadowBlur = S.shadow*k*scale; c.shadowOffsetY = S.shadow*k/3*scale;
+    c.fillStyle = S.winBg; c.beginPath();
+    poly.forEach((p,i) => i ? c.lineTo(p[0],p[1]) : c.moveTo(p[0],p[1]));
+    c.closePath(); c.fill(); c.restore();
+  }
+
+  // 3. warp the texture onto a layer using a grid of small triangles
+  const L = document.createElement("canvas");
+  L.width = Math.ceil(W*scale); L.height = Math.ceil(H*scale);
+  const l = L.getContext("2d");
+  l.imageSmoothingEnabled = true; l.imageSmoothingQuality = "high";
+  l.setTransform(scale,0,0,scale,0,0);
+  const GX = 28, GY = 18, V = [];
+  for (let j = 0; j <= GY; j++) for (let i = 0; i <= GX; i++) {
+    const u = i/GX*ww, v = j/GY*wh, d = pt(u,v);
+    V.push([u*ts, v*ts, d[0], d[1]]);
+  }
+  const at = (i,j) => V[j*(GX+1)+i], e = 0.7/scale;
+  for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) {
+    const a = at(i,j), b = at(i+1,j), cc = at(i+1,j+1), d = at(i,j+1);
+    texTri(l,tex,a,b,d,e); texTri(l,tex,b,cc,d,e);
+  }
+
+  // 4. fade the right and bottom edges into the background
+  if (S.fade > 0) {
+    const f = S.fade/100;
+    l.globalCompositeOperation = "destination-out";
+    const fade = (p0,p1) => {
+      const g = l.createLinearGradient(p0[0],p0[1],p1[0],p1[1]);
+      g.addColorStop(0,"rgba(0,0,0,0)"); g.addColorStop(.55,"rgba(0,0,0,.22)"); g.addColorStop(1,"rgba(0,0,0,.94)");
+      l.fillStyle = g; l.fillRect(-W,-H,W*3,H*3);
+    };
+    fade(pt(ww*(1-f),wh/2), pt(ww,wh/2));
+    fade(pt(ww/2,wh*(1-f)), pt(ww/2,wh));
+    l.globalCompositeOperation = "source-over";
+  }
+
+  c.drawImage(L,0,0,W,H);
 }
 
 function drawText(c,W,H){
@@ -563,6 +689,11 @@ function canvasPoint(e){
 }
 function overWindow(p){
   const {W,H} = dims(), r = winRect(W,H);
+  if (S.view === "3d") {
+    const P = project3D(r.w,r.h), cx = r.x+r.w/2, cy = r.y+r.h/2, xs = [], ys = [];
+    [[0,0],[r.w,0],[r.w,r.h],[0,r.h]].forEach(([u,v]) => { const q = P(u,v); xs.push(cx+q[0]); ys.push(cy+q[1]); });
+    return p.x >= Math.min(...xs) && p.x <= Math.max(...xs) && p.y >= Math.min(...ys) && p.y <= Math.max(...ys);
+  }
   return p.x >= r.x && p.x <= r.x+r.w && p.y >= r.y && p.y <= r.y+r.h;
 }
 cv.addEventListener("pointerdown", e => {
@@ -605,11 +736,11 @@ document.getElementById("btnCopy").onclick = async (e) => {
 document.getElementById("btnSaveJson").onclick = () => download(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}), slug()+"-banner-settings.json");
 document.getElementById("jsonIn").onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
-  try { const o = JSON.parse(await f.text()); S = Object.assign({}, DEFAULTS, o); syncUI(); ensureFonts().then(schedule); schedule(); persist(); }
+  try { const o = JSON.parse(await f.text()); S = Object.assign(fresh(), o); syncUI(); ensureFonts().then(schedule); schedule(); persist(); }
   catch (err) { alert("That file is not a valid settings file."); }
   e.target.value = "";
 };
-document.getElementById("btnReset").onclick = () => { if (confirm("Reset all settings?")) { S = Object.assign({}, DEFAULTS); syncUI(); ensureFonts().then(schedule); schedule(); persist(); } };
+document.getElementById("btnReset").onclick = () => { if (confirm("Reset all settings?")) { S = fresh(); syncUI(); ensureFonts().then(schedule); schedule(); persist(); } };
 
 /* ---------- start ---------- */
 syncUI();
