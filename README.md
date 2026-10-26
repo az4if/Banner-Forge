@@ -152,4 +152,4 @@ README.md      this file
 
 ## Credits
 
-Made by [azif.me](https://azif.me).
+Made by [AziF](https://github.com/az4if).
