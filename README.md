@@ -51,7 +51,7 @@ Leave a field empty to hide it.
 ### 4. Choose colors
 
 Open **Colors**:
-- Click a preset (Violet, Ember, Ocean, Forest, Rose or Light) for a quick start.
+- Click one of the 21 presets (dark ones like Violet, Forge, Sunset, Mint and Midnight, plus light ones like Sand, Paper and Blush) for a quick start, or press **Shuffle** for a random palette.
 - Then fine tune any color with the pickers: background, accent (label, left bar, line under the window bar), title, description, and the tag fill, border and text.
 - To match your site, set the accent to your brand color, then set the glow color in **Background** to the same one.
 
@@ -123,6 +123,22 @@ git push -u origin main
 ```
 
 Then enable Pages as in steps 3 and 4.
+
+## Releasing a new version
+
+The version lives in one place: the `APP_VERSION` line near the top of the script in `index.html`.
+
+1. Change `const APP_VERSION = "1.0.2";` to the new number, for example `"1.0.3"`.
+2. Add an entry at the top of the `CHANGELOG` list just below it. This is what people see when they click the version badge.
+3. Commit and push to `main`. GitHub Pages deploys in about a minute.
+
+What visitors get:
+- **Opening the site:** the page checks the deployed `index.html` and, if it is newer than the copy in the browser cache, switches to the new build by itself. Old versions do not stick around.
+- **Already open in a tab:** a small "Version 1.0.3 is available" message appears with an **Update now** button. It asks first so nobody loses a screenshot they are working on. The check runs when the tab regains focus and every 5 minutes.
+- **After updating:** a short "Updated to v1.0.3" message appears with a link to what's new.
+- Icons and the logo are loaded with the version in their address, so a new version always fetches fresh ones.
+
+Always change `APP_VERSION` when you push a change. Pushing without bumping it still deploys, but open pages will not know there is anything new.
 
 ## Project files
 

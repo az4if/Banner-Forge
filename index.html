@@ -9,93 +9,228 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icon/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon/icon-192.png">
 <link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
-<meta name="theme-color" content="#14141a">
+<meta name="theme-color" content="#121218">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Inter:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0c0c10; --panel:#14141a; --panel2:#1b1b23; --line:#2a2a34;
-  --text:#ececf1; --muted:#9a9aa8; --accent:#8b5cf6;
+  color-scheme:dark;
+  --bg:#0b0b0f; --panel:#121218; --panel2:#1a1a22; --line:#262631; --line2:#34343f;
+  --text:#f1f1f5; --muted:#9494a3;
+  --accent:#f4620d; --accent2:#ff8a3d; --accent-soft:rgba(244,98,13,.14);
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
-header{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;flex-wrap:wrap}
-header .brand{display:flex;align-items:center;gap:10px}
-header .logo{width:34px;height:34px;border-radius:9px;background:#fff;padding:4px;display:block}
-header h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
-header .sp{flex:1}
-button,.btn{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
-button:hover,.btn:hover{border-color:#44445a}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-button.primary:hover{filter:brightness(1.1)}
-main{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:calc(100% - 57px)}
-#stage{padding:20px;overflow:auto;display:flex;flex-direction:column;gap:12px;align-items:center}
-#wrap{width:100%;max-width:1200px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:
-  conic-gradient(#1a1a20 25%,#15151a 0 50%,#1a1a20 0 75%,#15151a 0) 0 0/20px 20px;line-height:0}
+html,body{margin:0}
+html{height:100%}
+body{height:100%;display:flex;flex-direction:column;color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:radial-gradient(900px 500px at 85% 110%,rgba(244,98,13,.07),transparent 70%),var(--bg);-webkit-font-smoothing:antialiased}
+::selection{background:rgba(244,98,13,.35)}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+
+/* scrollbars */
+::-webkit-scrollbar{width:12px;height:12px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#33333e;border-radius:12px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--accent);background-clip:content-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:#3a3a46 transparent}}
+
+/* header */
+header{position:relative;z-index:5;display:flex;align-items:center;gap:14px;padding:12px 20px;flex-wrap:wrap;
+  background:radial-gradient(520px 110px at 0% 0%,rgba(244,98,13,.20),transparent 70%),linear-gradient(180deg,#17171e,#121218);
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.6)}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,var(--accent),rgba(244,98,13,.25) 40%,var(--line) 75%)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;border-radius:11px;background:#fff;padding:5px;display:block;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 8px 22px -6px rgba(244,98,13,.55)}
+.brand-text{display:grid;line-height:1.15}
+header h1{font-size:16px;margin:0;font-weight:800;letter-spacing:-.01em}
+.sub{font-size:11.5px;color:var(--muted)}
+.ver{font:500 11px/1 "JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;padding:5px 9px;border-radius:99px;background:var(--accent-soft);color:#ffb487;border:1px solid rgba(244,98,13,.38)}
+.ver:hover{background:rgba(244,98,13,.24);border-color:rgba(244,98,13,.6)}
+.sp{flex:1}
+.grp{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.grp + .grp{padding-left:14px;border-left:1px solid var(--line)}
+
+/* buttons */
+button,.btn{font:500 13px/1 Inter,system-ui,sans-serif;color:var(--text);background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:9px 13px;cursor:pointer;
+  transition:background .15s,border-color .15s,transform .05s,box-shadow .15s;display:inline-flex;align-items:center;justify-content:center}
+button:hover,.btn:hover{background:#22222c;border-color:#4a4a59}
+button:active,.btn:active{transform:translateY(1px)}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+button.ghost:hover{color:var(--text);background:rgba(255,255,255,.05);border-color:transparent}
+button.primary{background:linear-gradient(180deg,var(--accent2),var(--accent));border-color:rgba(255,160,100,.55);color:#fff;font-weight:600;
+  box-shadow:0 8px 20px -8px rgba(244,98,13,.8),inset 0 1px 0 rgba(255,255,255,.25)}
+button.primary:hover{filter:brightness(1.08);background:linear-gradient(180deg,var(--accent2),var(--accent))}
+button.sm{padding:7px 11px;font-size:12px}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+/* layout */
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 392px}
+#stage{padding:26px;overflow:auto;display:flex;flex-direction:column;gap:14px;align-items:center}
+#wrap{width:100%;max-width:1200px;border-radius:12px;overflow:hidden;line-height:0;
+  background:conic-gradient(#1a1a20 25%,#15151a 0 50%,#1a1a20 0 75%,#15151a 0) 0 0/20px 20px;
+  box-shadow:0 0 0 1px var(--line2),0 40px 90px -30px rgba(0,0,0,.85),0 0 80px -30px rgba(244,98,13,.25)}
 #cv{width:100%;height:auto;display:block;touch-action:none}
-#hint{color:var(--muted);font-size:12.5px;text-align:center;max-width:720px}
+#meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;font:500 11.5px "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--muted)}
+#meta b{font-weight:500;color:#d6d6df;background:var(--panel2);border:1px solid var(--line);padding:3px 8px;border-radius:99px}
+#hint{color:var(--muted);font-size:12.5px;text-align:center;max-width:640px}
+
+/* side panel */
 aside{border-left:1px solid var(--line);background:var(--panel);overflow:auto}
 details{border-bottom:1px solid var(--line)}
-summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;user-select:none}
-summary::after{content:"+";color:var(--muted)}
-details[open] summary::after{content:"–"}
-.body{padding:2px 16px 16px;display:grid;gap:11px}
-.f{display:grid;gap:4px}
+summary{cursor:pointer;padding:14px 18px;font-weight:700;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:#c9c9d4;list-style:none;display:flex;justify-content:space-between;align-items:center;user-select:none;transition:background .15s}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:rgba(255,255,255,.025)}
+summary::after{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin-right:3px}
+details[open]>summary{color:var(--text);box-shadow:inset 3px 0 0 var(--accent)}
+details[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+.body{padding:2px 18px 18px;display:grid;gap:13px}
+.f{display:grid;gap:5px}
 .f label,.row label{font-size:12px;color:var(--muted)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit}
-textarea{resize:vertical}
-input[type=color]{width:46px;height:28px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
-input[type=range]{width:100%;accent-color:var(--accent)}
-.rg{display:grid;grid-template-columns:1fr 44px;gap:8px;align-items:center}
-.rg output{font-size:12px;color:var(--muted);text-align:right}
-.presets{display:flex;flex-wrap:wrap;gap:6px}
-.presets button{padding:5px 10px;font-size:12px}
-#drop{border:1.5px dashed #3a3a4a;border-radius:10px;padding:16px;text-align:center;color:var(--muted);cursor:pointer}
-#drop:hover,#drop.over{border-color:var(--accent);color:var(--text)}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=text],textarea,select{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:9px;padding:9px 11px;font:inherit;transition:border-color .15s,box-shadow .15s}
+input[type=text]:hover,textarea:hover,select:hover{border-color:#4a4a59}
+input[type=text]:focus,textarea:focus,select:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,98,13,.2)}
+textarea{resize:vertical;min-height:44px}
+select{appearance:none;-webkit-appearance:none;padding-right:32px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%239494a3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center}
+input[type=color]{-webkit-appearance:none;appearance:none;width:46px;height:28px;padding:2px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:0;border-radius:5px}
+input[type=color]::-moz-color-swatch{border:0;border-radius:5px}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:20px;background:transparent;cursor:pointer;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--line2)}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--line2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;margin-top:-5.5px;border-radius:50%;background:var(--accent2);border:2px solid var(--panel);box-shadow:0 0 0 1px var(--accent),0 2px 8px rgba(0,0,0,.5);transition:transform .12s}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--accent2);border:2px solid var(--panel);box-shadow:0 0 0 1px var(--accent)}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
+.rg{display:grid;grid-template-columns:1fr 46px;gap:10px;align-items:center}
+.rg output{font:500 11.5px "JetBrains Mono",ui-monospace,Menlo,monospace;color:#c9c9d4;text-align:right}
+.presets{display:flex;flex-wrap:wrap;gap:7px}
+.presets button{padding:6px 11px 6px 9px;font-size:12px;gap:7px;border-radius:99px}
+.presets button.shuffle{border-style:dashed;color:#ffb487}
+.presets button i{width:10px;height:10px;border-radius:50%;display:block;box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+
+/* screenshot drop zone */
+#drop{border:1.5px dashed #3d3d4b;border-radius:12px;padding:16px;color:var(--muted);cursor:pointer;background:rgba(255,255,255,.015);transition:border-color .15s,background .15s,color .15s}
+#drop:hover,#drop.over{border-color:var(--accent);background:var(--accent-soft);color:var(--text)}
+.dz-empty{display:grid;justify-items:center;gap:6px;text-align:center}
+.dz-empty svg{width:30px;height:30px;color:var(--accent2)}
+.dz-empty b{font-weight:600;color:var(--text)}
+.dz-empty small{font-size:11.5px}
+.dz-file{display:flex;align-items:center;gap:12px;min-width:0}
+.dz-file[hidden],.dz-empty[hidden]{display:none}
+.dz-file img{width:64px;height:44px;object-fit:cover;object-position:top;border-radius:7px;border:1px solid var(--line2);flex:none;background:var(--bg)}
+.dz-file div{display:grid;min-width:0}
+.dz-file b{font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dz-file span{font:500 11.5px "JetBrains Mono",ui-monospace,Menlo,monospace}
+
+.foot{position:sticky;bottom:0;display:flex;justify-content:space-between;gap:10px;padding:14px 18px;font-size:12px;color:var(--muted);
+  background:linear-gradient(180deg,rgba(18,18,24,0),var(--panel) 35%)}
+.foot a{color:#ffb487;text-decoration:none}
+.foot a:hover{text-decoration:underline}
+.foot button{padding:0;border:0;background:none;color:#ffb487;font:inherit;display:inline}
+
+/* toasts + modal */
+#toasts{position:fixed;right:18px;bottom:18px;display:grid;gap:10px;z-index:60;max-width:min(380px,calc(100vw - 36px))}
+.toast{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px;background:#1c1c25;border:1px solid var(--line2);border-left:3px solid var(--accent);border-radius:11px;
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.8);animation:tin .25s ease-out;font-size:13px}
+.toast.out{opacity:0;transform:translateY(6px);transition:.2s}
+.toast .x{background:none;border:0;color:var(--muted);font-size:18px;padding:0 4px;line-height:1}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(6,6,9,.66);backdrop-filter:blur(5px);padding:16px}
+.modal[hidden]{display:none}
+.card{width:min(460px,100%);max-height:80vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:22px;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.9),0 0 60px -30px rgba(244,98,13,.5)}
+.card h2{margin:0 0 4px;font-size:18px;letter-spacing:-.01em}
+.card .lead{margin:0 0 16px;color:var(--muted);font-size:13px}
+.rel{padding:14px 0;border-top:1px solid var(--line)}
+.rel h3{margin:0 0 8px;font-size:13.5px;display:flex;gap:8px;align-items:center}
+.rel ul{margin:0;padding-left:18px;color:#c9c9d4;font-size:13px}
+.rel li{margin:3px 0}
+.pill{font:500 10.5px "JetBrains Mono",ui-monospace,monospace;padding:3px 7px;border-radius:99px;background:var(--accent-soft);color:#ffb487;border:1px solid rgba(244,98,13,.35)}
+.pill.cur{background:var(--accent);color:#fff;border-color:transparent}
+
 @media (max-width:900px){
-  main{grid-template-columns:1fr;height:auto}
-  aside{border-left:0;border-top:1px solid var(--line)}
-  header{position:static}
+  body{height:auto;min-height:100%;display:block}
+  main{display:block}
+  #stage{padding:16px}
+  aside{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .grp + .grp{padding-left:0;border-left:0}
+  .sp{display:none}
 }
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <img class="logo" src="icon/logo.png" alt="" width="34" height="34">
-    <h1>Banner Forge</h1>
+    <img class="logo" src="icon/logo.png" alt="" width="38" height="38">
+    <div class="brand-text"><h1>Banner Forge</h1><span class="sub">Screenshot to banner</span></div>
+    <button id="verBtn" class="ver" type="button" title="What's new">v</button>
   </div>
   <div class="sp"></div>
-  <button id="btnReset" title="Reset everything to defaults">Reset</button>
-  <button id="btnSaveJson" title="Download your settings as a JSON file">Save settings</button>
-  <label class="btn" for="jsonIn">Load settings</label>
-  <input id="jsonIn" type="file" accept=".json,application/json" hidden>
-  <button id="btnCopy">Copy PNG</button>
-  <button id="btnJpg">Download JPG</button>
-  <button id="btnPng" class="primary">Download PNG</button>
+  <div class="grp">
+    <button id="btnReset" class="ghost" title="Reset everything to defaults">Reset</button>
+    <button id="btnSaveJson" title="Download your settings as a JSON file">Save settings</button>
+    <label class="btn" for="jsonIn" tabindex="0">Load settings</label>
+    <input id="jsonIn" type="file" accept=".json,application/json" hidden>
+  </div>
+  <div class="grp">
+    <button id="btnCopy">Copy PNG</button>
+    <button id="btnJpg">Download JPG</button>
+    <button id="btnPng" class="primary">Download PNG</button>
+  </div>
 </header>
 <main>
   <section id="stage">
     <div id="wrap"><canvas id="cv"></canvas></div>
+    <div id="meta"></div>
     <div id="hint">Drag the browser window on the preview to move it. You can also drop or paste (Ctrl/Cmd+V) a screenshot anywhere on this page.</div>
   </section>
   <aside id="panel">
     <details open>
       <summary>Screenshot</summary>
       <div class="body">
-        <div id="drop">Click, drop or paste a screenshot here<input id="fileIn" type="file" accept="image/*" hidden></div>
-        <button id="btnClearImg">Remove screenshot</button>
+        <div id="drop" tabindex="0" role="button" aria-label="Add a screenshot">
+          <div class="dz-empty" id="dzEmpty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+            <b>Add a screenshot</b>
+            <small>Click, drop or paste (Ctrl/Cmd+V)</small>
+          </div>
+          <div class="dz-file" id="dzFile" hidden><img id="thumb" alt=""><div><b id="fname"></b><span id="fmeta"></span></div></div>
+          <input id="fileIn" type="file" accept="image/*" hidden>
+        </div>
+        <button id="btnClearImg" disabled>Remove screenshot</button>
       </div>
     </details>
+    <div class="foot" id="foot"><span>Banner Forge <button id="footLog" type="button"><span id="footVer"></span></button></span><a href="https://azif.me" target="_blank" rel="noopener">azif.me</a></div>
   </aside>
 </main>
+<div id="toasts" aria-live="polite"></div>
+<div class="modal" id="log" hidden><div class="card" id="logCard" role="dialog" aria-modal="true" aria-label="What's new"></div></div>
 
 <script>
 "use strict";
+
+/* ===== Release version =====
+   Bump APP_VERSION (and add a CHANGELOG entry) every time you publish.
+   Open pages compare themselves with the deployed index.html and update automatically. */
+const APP_VERSION = "1.0.2";
+const CHANGELOG = [
+  {v:"1.0.2", date:"Oct 2026", notes:[
+    "New 3D screenshot preview with turn, tilt, perspective and edge fade",
+    "Redesigned interface: orange theme, themed scrollbars, new header and controls",
+    "Version badge, this changelog and automatic updates"]},
+  {v:"1.0.1", date:"Oct 2026", notes:[
+    "Banner Forge logo and favicon",
+    "Full tutorial in the README"]},
+  {v:"1.0.0", date:"Oct 2026", notes:[
+    "First release: add a screenshot, edit text and colors, export PNG or JPG"]}
+];
 
 /* ---------- defaults & presets ---------- */
 const DEFAULTS = {
@@ -129,6 +264,33 @@ const PRESETS = {
   "Rose":   {bg:"#0f070b",accent:"#fb7185",text:"#fff7f9",muted:"#b19aa2",tagBg:"#1b0e14",tagBorder:"#35202a",tagText:"#f7dde3",glow:"#e11d48",winBg:"#12080d",winBorder:"#35202a",barBg:"#1b0e14"},
   "Light":  {bg:"#f5f5f7",accent:"#4f46e5",text:"#0f0f14",muted:"#585866",tagBg:"#ffffff",tagBorder:"#d9d9e0",tagText:"#26262f",glow:"#818cf8",winBg:"#ffffff",winBorder:"#d4d4dc",barBg:"#ececf1"}
 };
+function mixHex(a,b,t){
+  const x = parseInt(a.slice(1),16), y = parseInt(b.slice(1),16);
+  const ch = sh => Math.round(((x>>sh)&255)*(1-t) + ((y>>sh)&255)*t);
+  return "#" + ((1<<24) | (ch(16)<<16) | (ch(8)<<8) | ch(0)).toString(16).slice(1);
+}
+function makePreset(bg, accent, glow){
+  if (luminance(bg) > .5) return {bg, accent, glow, text:"#0f0f14", muted:mixHex(bg,"#000000",.62), tagBg:"#ffffff", tagBorder:mixHex(bg,"#000000",.13), tagText:mixHex(bg,"#000000",.86), winBg:"#ffffff", winBorder:mixHex(bg,"#000000",.15), barBg:mixHex(bg,"#000000",.05)};
+  return {bg, accent, glow, text:"#ffffff", muted:mixHex(bg,"#ffffff",.64), tagBg:mixHex(bg,"#ffffff",.07), tagBorder:mixHex(bg,"#ffffff",.17), tagText:mixHex(bg,"#ffffff",.88), winBg:mixHex(bg,"#ffffff",.03), winBorder:mixHex(bg,"#ffffff",.15), barBg:mixHex(bg,"#ffffff",.07)};
+}
+[
+  ["Forge","#0c0a09","#f4620d","#ff7a2f"], ["Sunset","#0f0a0d","#ff6b4a","#ff3d81"], ["Crimson","#0d0708","#ef4444","#dc2626"],
+  ["Gold","#0d0b06","#fbbf24","#f59e0b"], ["Lime","#090d06","#a3e635","#84cc16"], ["Mint","#06100e","#2dd4bf","#14b8a6"],
+  ["Cyan","#060d12","#22d3ee","#06b6d4"], ["Midnight","#05070f","#60a5fa","#2563eb"], ["Indigo","#070816","#818cf8","#6366f1"],
+  ["Magenta","#110614","#d946ef","#a21caf"], ["Pink","#100712","#f472b6","#db2777"], ["Mono","#0a0a0a","#e5e5e5","#737373"],
+  ["Sand","#f6f1e7","#c2410c","#fdba74"], ["Paper","#f3f6fb","#2563eb","#93c5fd"], ["Blush","#fdf2f4","#e11d48","#fda4af"]
+].forEach(([n,bg,ac,gl]) => { PRESETS[n] = makePreset(bg,ac,gl); });
+
+function hslHex(h,s,l){
+  s /= 100; l /= 100;
+  const k = n => (n + h/30) % 12, a = s*Math.min(l,1-l);
+  const f = n => Math.round(255*(l - a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)))));
+  return "#" + ((1<<24) | (f(0)<<16) | (f(8)<<8) | f(4)).toString(16).slice(1);
+}
+function randomPreset(){
+  const h = Math.floor(Math.random()*360), h2 = (h + 20 + Math.floor(Math.random()*50)) % 360;
+  return makePreset(hslHex(h,40,5), hslHex(h2,88,62), hslHex(h,90,52));
+}
 const SIZES = [
   ["1200x630","1200 × 630 – Open Graph / social preview"],
   ["1280x640","1280 × 640 – GitHub social preview"],
@@ -152,7 +314,8 @@ const SCHEMA = [
   {title:"Colors", open:true, presets:true, fields:[
     {k:"bg",t:"color",l:"Background"},{k:"accent",t:"color",l:"Accent (label, bar, line)"},
     {k:"text",t:"color",l:"Title"},{k:"muted",t:"color",l:"Description / footer"},
-    {k:"tagBg",t:"color",l:"Tag fill"},{k:"tagBorder",t:"color",l:"Tag border"},{k:"tagText",t:"color",l:"Tag text"}
+    {k:"tagBg",t:"color",l:"Tag fill"},{k:"tagBorder",t:"color",l:"Tag border"},{k:"tagText",t:"color",l:"Tag text"},
+    {k:"glow",t:"color",l:"Background glow"}
   ]},
   {title:"Typography", fields:[
     {k:"font",t:"select",l:"Font",opts:FONTS.map(f=>[f,f])},
@@ -198,7 +361,6 @@ const SCHEMA = [
   ]},
   {title:"Background", fields:[
     {k:"glowOn",t:"check",l:"Glow"},
-    {k:"glow",t:"color",l:"Glow color"},
     {k:"glowX",t:"range",l:"Glow X (%)",min:-20,max:120,step:1},
     {k:"glowY",t:"range",l:"Glow Y (%)",min:-20,max:120,step:1},
     {k:"glowR",t:"range",l:"Glow size (%)",min:10,max:150,step:1},
@@ -239,10 +401,14 @@ SCHEMA.forEach(g => {
   if (g.presets) {
     const p = document.createElement("div"); p.className = "presets";
     Object.keys(PRESETS).forEach(name => {
-      const b = document.createElement("button"); b.textContent = name;
+      const b = document.createElement("button"); b.innerHTML = `<i style="background:${PRESETS[name].accent}"></i>${name}`;
       b.onclick = () => { Object.assign(S, PRESETS[name]); syncUI(); schedule(); persist(); };
       p.appendChild(b);
     });
+    const sh = document.createElement("button"); sh.className = "shuffle"; sh.title = "Random palette";
+    sh.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Shuffle';
+    sh.onclick = () => { Object.assign(S, randomPreset()); syncUI(); schedule(); persist(); };
+    p.insertBefore(sh, p.firstChild);
     body.appendChild(p);
   }
   g.fields.forEach(f => {
@@ -659,6 +825,7 @@ function draw(){
   const {W,H} = dims();
   if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
   render(ctx,W,H,1);
+  updateMeta();
 }
 
 /* ---------- image input ---------- */
@@ -666,13 +833,14 @@ function loadFile(file){
   if (!file || !file.type.startsWith("image/")) return;
   const url = URL.createObjectURL(file);
   const im = new Image();
-  im.onload = () => { img = im; S.panY = 0; S.panX = 0; S.zoom = 100; syncUI(); schedule(); };
+  im.onload = () => { img = im; S.panY = 0; S.panX = 0; S.zoom = 100; showFile(file.name || "Pasted image", im, url); syncUI(); schedule(); };
   im.src = url;
 }
 const drop = document.getElementById("drop"), fileIn = document.getElementById("fileIn");
 drop.onclick = () => fileIn.click();
 fileIn.onchange = () => loadFile(fileIn.files[0]);
-document.getElementById("btnClearImg").onclick = () => { img = null; schedule(); };
+document.getElementById("btnClearImg").onclick = () => clearFile();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } };
 ["dragenter","dragover"].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave","drop"].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
 window.addEventListener("drop", e => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) loadFile(f); });
@@ -722,14 +890,13 @@ async function makeBlob(type){
 function download(blob,name){
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast("Saved " + name);
 }
 document.getElementById("btnPng").onclick = async () => download(await makeBlob("image/png"), slug()+"-banner.png");
 document.getElementById("btnJpg").onclick = async () => download(await makeBlob("image/jpeg"), slug()+"-banner.jpg");
 document.getElementById("btnCopy").onclick = async (e) => {
-  const b = e.target, old = b.textContent;
-  try { await navigator.clipboard.write([new ClipboardItem({"image/png": await makeBlob("image/png")})]); b.textContent = "Copied"; }
-  catch (err) { b.textContent = "Copy not supported"; }
-  setTimeout(() => b.textContent = old, 1500);
+  try { await navigator.clipboard.write([new ClipboardItem({"image/png": await makeBlob("image/png")})]); toast("Copied to clipboard"); }
+  catch (err) { toast("Your browser blocked copying. Use Download PNG instead.", {ms:4500}); }
 };
 
 /* ---------- settings file / reset ---------- */
@@ -742,10 +909,124 @@ document.getElementById("jsonIn").onchange = async (e) => {
 };
 document.getElementById("btnReset").onclick = () => { if (confirm("Reset all settings?")) { S = fresh(); syncUI(); ensureFonts().then(schedule); schedule(); persist(); } };
 
+/* ---------- app shell: toasts, what's new, auto-update ---------- */
+const $ = id => document.getElementById(id);
+
+function toast(msg, opt = {}){
+  const t = document.createElement("div"); t.className = "toast";
+  const s = document.createElement("span"); s.textContent = msg; t.appendChild(s);
+  const close = () => { t.classList.add("out"); setTimeout(() => t.remove(), 220); };
+  if (opt.action) {
+    const b = document.createElement("button"); b.className = "primary sm"; b.textContent = opt.action.label;
+    b.onclick = () => { opt.action.fn(); close(); }; t.appendChild(b);
+  }
+  if (opt.sticky) {
+    const x = document.createElement("button"); x.className = "x"; x.setAttribute("aria-label","Dismiss"); x.textContent = "×";
+    x.onclick = close; t.appendChild(x);
+  } else setTimeout(close, opt.ms || 2600);
+  $("toasts").appendChild(t);
+}
+
+/* what's new */
+function buildLog(){
+  const card = $("logCard");
+  card.innerHTML = `<h2>What's new</h2><p class="lead">Banner Forge v${APP_VERSION}</p>` + CHANGELOG.map(r =>
+    `<div class="rel"><h3>v${r.v} ${r.v === APP_VERSION ? '<span class="pill cur">Current</span>' : ""}<span class="pill">${r.date}</span></h3><ul>${r.notes.map(n => `<li>${n}</li>`).join("")}</ul></div>`
+  ).join("");
+}
+function openLog(){ buildLog(); $("log").hidden = false; }
+function closeLog(){ $("log").hidden = true; }
+$("verBtn").onclick = openLog;
+$("footLog").onclick = openLog;
+$("log").addEventListener("click", e => { if (e.target === $("log")) closeLog(); });
+window.addEventListener("keydown", e => { if (e.key === "Escape") closeLog(); });
+
+/* version labels + versioned asset URLs (a new version always fetches fresh icons) */
+$("verBtn").textContent = "v" + APP_VERSION;
+$("footVer").textContent = "v" + APP_VERSION;
+document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"]').forEach(l => { l.href = l.getAttribute("href").split("?")[0] + "?v=" + APP_VERSION; });
+document.querySelector(".logo").src = "icon/logo.png?v=" + APP_VERSION;
+
+/* clean the ?v= / ?t= parameters that an update reload adds */
+try {
+  const u = new URL(location.href);
+  if (u.searchParams.has("v") || u.searchParams.has("t")) {
+    u.searchParams.delete("v"); u.searchParams.delete("t");
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  }
+} catch (e) {}
+
+/* auto-update: compare this build with the deployed index.html */
+function cmpVer(a,b){
+  const x = a.split(".").map(Number), y = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length,y.length); i++) { const d = (x[i]||0) - (y[i]||0); if (d) return d > 0 ? 1 : -1; }
+  return 0;
+}
+async function remoteVersion(){
+  const base = location.href.split(/[?#]/)[0];
+  const r = await fetch(base + "?cb=" + Date.now(), {cache:"no-store"});
+  if (!r.ok) return null;
+  const m = (await r.text()).match(/const APP_VERSION\s*=\s*"([^"]+)"/);
+  return m ? m[1] : null;
+}
+function reloadLatest(rv){
+  const u = new URL(location.href);
+  u.searchParams.set("v", rv); u.searchParams.set("t", Date.now());
+  location.replace(u.toString());
+}
+let updateShown = false;
+async function checkUpdate(initial){
+  if (location.protocol === "file:" || updateShown) return;
+  try {
+    const rv = await remoteVersion();
+    if (!rv || cmpVer(rv, APP_VERSION) <= 0) return;
+    const key = "bannerForge.autoReload." + rv;
+    let tried = false; try { tried = !!sessionStorage.getItem(key); } catch (e) {}
+    if (initial && !img && !tried) {             // nothing to lose yet: switch to the new build straight away
+      try { sessionStorage.setItem(key,"1"); } catch (e) {}
+      reloadLatest(rv); return;
+    }
+    updateShown = true;                          // mid-session: ask first, so your screenshot is not lost
+    toast("Version " + rv + " is available.", {sticky:true, action:{label:"Update now", fn:() => reloadLatest(rv)}});
+  } catch (e) {}
+}
+
+/* tell the user when a new version has just been installed */
+try {
+  const last = localStorage.getItem("bannerForge.lastVersion");
+  if (last && last !== APP_VERSION) toast("Updated to v" + APP_VERSION, {ms:6000, action:{label:"What's new", fn:openLog}});
+  localStorage.setItem("bannerForge.lastVersion", APP_VERSION);
+} catch (e) {}
+
+/* status line under the preview */
+function updateMeta(){
+  const {W,H} = dims(), sc = parseInt(S.exportScale,10) || 1;
+  $("meta").innerHTML = `<b>${W} × ${H}</b><span>exports at ${sc}×</span><b>${W*sc} × ${H*sc} px</b>`;
+}
+
+/* screenshot chip in the drop zone */
+let thumbUrl = null;
+function showFile(name, im, url){
+  if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+  thumbUrl = url;
+  $("thumb").src = url; $("fname").textContent = name; $("fmeta").textContent = im.width + " × " + im.height + " px";
+  $("dzEmpty").hidden = true; $("dzFile").hidden = false; $("btnClearImg").disabled = false;
+}
+function clearFile(){
+  img = null;
+  if (thumbUrl) { URL.revokeObjectURL(thumbUrl); thumbUrl = null; }
+  $("dzEmpty").hidden = false; $("dzFile").hidden = true; $("btnClearImg").disabled = true;
+  schedule();
+}
+
 /* ---------- start ---------- */
 syncUI();
+panel.appendChild($("foot"));
 schedule();
 ensureFonts().then(schedule);
+setTimeout(() => checkUpdate(true), 400);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkUpdate(false); });
+setInterval(() => checkUpdate(false), 5*60*1000);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
 </script>
 </body>
