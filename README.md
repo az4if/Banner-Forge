@@ -4,7 +4,7 @@
 
 <h1 align="center">Banner Forge</h1>
 
-<p align="center">
+<p align="center"> 
   Turn any website screenshot into a polished project banner.<br>
   Runs entirely in your browser: no server, no build step, nothing is uploaded.
 </p>
