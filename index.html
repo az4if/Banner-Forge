@@ -113,6 +113,7 @@ const DEFAULTS = {
   glowOn: true, glow: "#7c3aed", glowX: 92, glowY: 8, glowR: 70, glowA: 38,
   gridOn: true, gridSize: 40, gridA: 4,
   barOn: true, barW: 6,
+  view: "2d", rotY: 26, rotX: 3, persp: 70,
   winX: 56, winY: 18, winW: 52, winH: 60, rot: 0, zoom: 100, panX: 0, panY: 0,
   frame: true, url: "azif.me", showUrl: false, dotsMac: false,
   barH: 30, radius: 12, shadow: 50, accentLine: true,
@@ -168,7 +169,11 @@ const SCHEMA = [
     {k:"textY",t:"range",l:"Vertical center (% of height)",min:10,max:90,step:.1},
     {k:"textW",t:"range",l:"Max text width (% of width)",min:15,max:90,step:.5}
   ]},
-  {title:"Screenshot window", fields:[
+  {title:"Screenshot window", open:true, fields:[
+    {k:"view",t:"select",l:"Screenshot preview",opts:[["2d","2D (flat)"],["3d","3D (perspective)"]]},
+    {k:"rotY",t:"range",l:"3D turn left / right (degrees)",min:-60,max:60,step:.5,only:"3d"},
+    {k:"rotX",t:"range",l:"3D tilt up / down (degrees)",min:-40,max:40,step:.5,only:"3d"},
+    {k:"persp",t:"range",l:"3D perspective strength",min:10,max:100,step:1,only:"3d"},
     {k:"winX",t:"range",l:"Left (% of width)",min:-40,max:100,step:.1},
     {k:"winY",t:"range",l:"Top (% of height)",min:-40,max:100,step:.1},
     {k:"winW",t:"range",l:"Width (% of width)",min:15,max:150,step:.1},
@@ -236,7 +241,12 @@ SCHEMA.forEach(g => {
     });
     body.appendChild(p);
   }
-  g.fields.forEach(f => body.appendChild(makeField(f)));
+  g.fields.forEach(f => {
+    const w = makeField(f);
+    inputs[f.k].wrap = w;
+    if (f.only) inputs[f.k].only = f.only;
+    body.appendChild(w);
+  });
   panel.appendChild(d);
 });
 
@@ -285,10 +295,11 @@ function makeField(f){
 
 function syncUI(){
   for (const k in inputs) {
-    const {el, out} = inputs[k];
+    const {el, out, wrap, only} = inputs[k];
     if (el.type === "checkbox") el.checked = !!S[k];
     else el.value = S[k];
     if (out) out.textContent = Math.round(S[k] * 10) / 10;
+    if (only && wrap) wrap.style.display = (S.view === only) ? "" : "none";
   }
 }
 
@@ -300,6 +311,7 @@ function update(k, v){
     S.textScale = Math.round(W / 1200 * 100);
     syncUI();
   }
+  if (k === "view") syncUI();
   if (k === "font" || k === "titleWeight" || k === "monoLabels") ensureFonts().then(schedule);
   schedule(); persist();
 }
