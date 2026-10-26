@@ -77,6 +77,7 @@ Open **Output**:
 - **Export resolution**: 2x gives the sharpest result and is a good default.
 
 Then use the buttons at the top:
+- **Preview** opens the finished banner in a popup. Zoom with the + and - buttons or the mouse wheel, drag to pan, press **Fit** or **100%**, and press Esc to close.
 - **Download PNG** or **Download JPG** saves the file.
 - **Copy PNG** copies the banner to your clipboard.
 

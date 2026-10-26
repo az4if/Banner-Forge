@@ -154,6 +154,27 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
 .pill{font:500 10.5px "JetBrains Mono",ui-monospace,monospace;padding:3px 7px;border-radius:99px;background:var(--accent-soft);color:#ffb487;border:1px solid rgba(244,98,13,.35)}
 .pill.cur{background:var(--accent);color:#fff;border-color:transparent}
 
+/* themed dialogs (replace the browser's confirm/alert boxes) */
+.card.dlg{width:min(400px,100%);animation:tin .18s ease-out}
+.card.dlg h2{font-size:17px;margin:0 0 6px}
+.card.dlg .lead{margin:0 0 20px;line-height:1.5}
+.dlg-actions{display:flex;gap:10px;justify-content:flex-end}
+.dlg-actions button{min-width:88px}
+button.danger{background:linear-gradient(180deg,#ef5350,#d32f2f);border-color:rgba(255,140,140,.5);color:#fff;font-weight:600;box-shadow:0 8px 20px -8px rgba(220,50,50,.8),inset 0 1px 0 rgba(255,255,255,.2)}
+button.danger:hover{filter:brightness(1.08);background:linear-gradient(180deg,#ef5350,#d32f2f)}
+
+/* preview popup */
+.pvwin{width:min(1400px,100%);height:min(88vh,100%);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line2);border-radius:16px;overflow:hidden;
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.9),0 0 60px -30px rgba(244,98,13,.5)}
+.pvbar{display:flex;align-items:center;gap:8px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#17171e,#121218);flex-wrap:wrap}
+.pvinfo{font:500 11.5px "JetBrains Mono",ui-monospace,Menlo,monospace;color:var(--muted);margin-left:6px}
+.pvsp{flex:1}
+.pvz{min-width:52px;text-align:center;font:500 12px "JetBrains Mono",ui-monospace,Menlo,monospace;color:#d6d6df}
+.pvview{position:relative;flex:1;min-height:0;overflow:hidden;cursor:grab;touch-action:none;user-select:none;
+  background:conic-gradient(#17171d 25%,#121217 0 50%,#17171d 0 75%,#121217 0) 0 0/22px 22px}
+.pvview.drag{cursor:grabbing}
+#pvImg{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;box-shadow:0 20px 60px rgba(0,0,0,.6);image-rendering:auto}
+.pvhint{padding:8px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);text-align:center}
 @media (max-width:900px){
   body{height:auto;min-height:100%;display:block}
   main{display:block}
@@ -180,6 +201,7 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
     <input id="jsonIn" type="file" accept=".json,application/json" hidden>
   </div>
   <div class="grp">
+    <button id="btnPreview" title="Open a zoomable preview"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:7px"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Preview</button>
     <button id="btnCopy">Copy PNG</button>
     <button id="btnJpg">Download JPG</button>
     <button id="btnPng" class="primary">Download PNG</button>
@@ -210,6 +232,29 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
     <div class="foot" id="foot"><span>Banner Forge <button id="footLog" type="button"><span id="footVer"></span></button></span><a href="https://github.com/az4if" target="_blank" rel="noopener">AziF</a></div>
   </aside>
 </main>
+<div class="modal" id="pv" hidden>
+  <div class="pvwin" role="dialog" aria-modal="true" aria-label="Banner preview">
+    <div class="pvbar">
+      <b>Preview</b><span id="pvInfo" class="pvinfo"></span>
+      <div class="pvsp"></div>
+      <button id="pvOut" class="sm" title="Zoom out (-)" aria-label="Zoom out">−</button>
+      <span id="pvZoom" class="pvz">100%</span>
+      <button id="pvIn" class="sm" title="Zoom in (+)" aria-label="Zoom in">+</button>
+      <button id="pvFit" class="sm" title="Fit to window (0)">Fit</button>
+      <button id="pv100" class="sm" title="Actual size (1)">100%</button>
+      <button id="pvClose" class="sm ghost" title="Close (Esc)" aria-label="Close">✕</button>
+    </div>
+    <div class="pvview" id="pvView"><img id="pvImg" alt="Banner preview" draggable="false"></div>
+    <div class="pvhint">Scroll to zoom, drag to pan, double-click to switch between fit and actual size.</div>
+  </div>
+</div>
+<div class="modal" id="dlg" hidden>
+  <div class="card dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlgTitle" aria-describedby="dlgMsg">
+    <h2 id="dlgTitle"></h2>
+    <p id="dlgMsg" class="lead"></p>
+    <div class="dlg-actions"><button id="dlgCancel" type="button">Cancel</button><button id="dlgOk" type="button" class="primary">OK</button></div>
+  </div>
+</div>
 <div id="toasts" aria-live="polite"></div>
 <div class="modal" id="log" hidden><div class="card" id="logCard" role="dialog" aria-modal="true" aria-label="What's new"></div></div>
 
@@ -219,8 +264,11 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
 /* ===== Release version =====
    Bump APP_VERSION (and add a CHANGELOG entry) every time you publish.
    Open pages compare themselves with the deployed index.html and update automatically. */
-const APP_VERSION = "1.0.4";
+const APP_VERSION = "1.0.5";
 const CHANGELOG = [
+  {v:"1.0.5", date:"Oct 2026", notes:[
+    "New Preview button: see the finished banner in a popup with zoom and pan",
+    "Reset and error messages now use themed dialogs, centered on screen"]},
   {v:"1.0.4", date:"Oct 2026", notes:[
     "3D preview now starts at 18\u00b0 turn and 0\u00b0 tilt",
     "21 color presets (dark and light) plus a Shuffle button",
@@ -908,10 +956,13 @@ document.getElementById("btnSaveJson").onclick = () => download(new Blob([JSON.s
 document.getElementById("jsonIn").onchange = async (e) => {
   const f = e.target.files[0]; if (!f) return;
   try { const o = JSON.parse(await f.text()); S = Object.assign(fresh(), o); syncUI(); ensureFonts().then(schedule); schedule(); persist(); }
-  catch (err) { alert("That file is not a valid settings file."); }
+  catch (err) { dialog({title:"Could not load settings", message:"That file is not a valid Banner Forge settings file.", ok:"OK", cancel:""}); }
   e.target.value = "";
 };
-document.getElementById("btnReset").onclick = () => { if (confirm("Reset all settings?")) { S = fresh(); syncUI(); ensureFonts().then(schedule); schedule(); persist(); } };
+document.getElementById("btnReset").onclick = async () => {
+  const yes = await dialog({title:"Reset all settings?", message:"Text, colors and layout go back to the defaults. Your screenshot stays loaded.", ok:"Reset", cancel:"Cancel", danger:true});
+  if (yes) { S = fresh(); syncUI(); ensureFonts().then(schedule); schedule(); persist(); toast("Settings reset"); }
+};
 
 /* ---------- app shell: toasts, what's new, auto-update ---------- */
 const $ = id => document.getElementById(id);
@@ -943,7 +994,7 @@ function closeLog(){ $("log").hidden = true; }
 $("verBtn").onclick = openLog;
 $("footLog").onclick = openLog;
 $("log").addEventListener("click", e => { if (e.target === $("log")) closeLog(); });
-window.addEventListener("keydown", e => { if (e.key === "Escape") closeLog(); });
+window.addEventListener("keydown", e => { if (e.key === "Escape") { closeLog(); closePreview(); } });
 
 /* version labels + versioned asset URLs (a new version always fetches fresh icons) */
 $("verBtn").textContent = "v" + APP_VERSION;
@@ -1022,6 +1073,97 @@ function clearFile(){
   $("dzEmpty").hidden = false; $("dzFile").hidden = true; $("btnClearImg").disabled = true;
   schedule();
 }
+
+/* ---------- themed dialogs ---------- */
+let dlgResolve = null;
+function dialog({title, message, ok = "OK", cancel = "Cancel", danger = false}){
+  if (dlgResolve) dlgResolve(false);
+  $("dlgTitle").textContent = title; $("dlgMsg").textContent = message;
+  const okB = $("dlgOk"), cB = $("dlgCancel");
+  okB.textContent = ok; okB.className = danger ? "danger" : "primary";
+  cB.textContent = cancel; cB.hidden = !cancel;
+  $("dlg").hidden = false; okB.focus();
+  return new Promise(res => { dlgResolve = res; });
+}
+function dlgClose(v){ if (!dlgResolve) return; const r = dlgResolve; dlgResolve = null; $("dlg").hidden = true; r(v); }
+$("dlgOk").onclick = () => dlgClose(true);
+$("dlgCancel").onclick = () => dlgClose(false);
+$("dlg").addEventListener("click", e => { if (e.target === $("dlg")) dlgClose(false); });
+window.addEventListener("keydown", e => {
+  if ($("dlg").hidden) return;
+  if (e.key === "Escape") { e.stopImmediatePropagation(); dlgClose(false); }
+  else if (e.key === "Enter" && document.activeElement !== $("dlgCancel")) { e.preventDefault(); dlgClose(true); }
+}, true);
+
+/* ---------- zoomable preview popup ---------- */
+const pv = {z:1, x:0, y:0, w:0, h:0, fit:1, fitMode:true, url:null};
+function pvApply(){
+  const im = $("pvImg");
+  im.style.transform = `translate(${pv.x}px,${pv.y}px) scale(${pv.z})`;
+  $("pvZoom").textContent = Math.round(pv.z*100) + "%";
+}
+function pvFit(){
+  const v = $("pvView"), vw = v.clientWidth, vh = v.clientHeight;
+  if (!pv.w) return;
+  pv.fit = Math.min(vw/pv.w, vh/pv.h) * 0.96;
+  pv.z = pv.fit; pv.x = (vw - pv.w*pv.z)/2; pv.y = (vh - pv.h*pv.z)/2; pv.fitMode = true; pvApply();
+}
+function pvZoomAt(z, cx, cy){
+  const nz = Math.max(pv.fit*0.5, Math.min(8, z)), r = nz/pv.z;
+  pv.x = cx - (cx - pv.x)*r; pv.y = cy - (cy - pv.y)*r; pv.z = nz; pv.fitMode = false; pvApply();
+}
+function pvCenter(){ const v = $("pvView"); return [v.clientWidth/2, v.clientHeight/2]; }
+async function openPreview(){
+  $("pv").hidden = false; $("pvInfo").textContent = "Rendering…"; $("pvImg").style.visibility = "hidden";
+  let blob = null;
+  try { blob = await makeBlob("image/png"); } catch (e) {}
+  if ($("pv").hidden) return;
+  if (!blob) { $("pvInfo").textContent = "Could not render"; return; }
+  if (pv.url) URL.revokeObjectURL(pv.url);
+  pv.url = URL.createObjectURL(blob);
+  const im = $("pvImg");
+  im.onload = () => {
+    pv.w = im.naturalWidth; pv.h = im.naturalHeight;
+    im.style.width = pv.w + "px"; im.style.height = pv.h + "px";
+    $("pvInfo").textContent = pv.w + " × " + pv.h + " px";
+    pvFit(); im.style.visibility = "";
+  };
+  im.src = pv.url;
+}
+function closePreview(){
+  if ($("pv").hidden) return;
+  $("pv").hidden = true;
+  if (pv.url) { URL.revokeObjectURL(pv.url); pv.url = null; }
+  $("pvImg").removeAttribute("src");
+}
+$("btnPreview").onclick = openPreview;
+$("pvClose").onclick = closePreview;
+$("pv").addEventListener("click", e => { if (e.target === $("pv")) closePreview(); });
+$("pvIn").onclick  = () => { const [cx,cy] = pvCenter(); pvZoomAt(pv.z*1.25, cx, cy); };
+$("pvOut").onclick = () => { const [cx,cy] = pvCenter(); pvZoomAt(pv.z/1.25, cx, cy); };
+$("pvFit").onclick = pvFit;
+$("pv100").onclick = () => { const [cx,cy] = pvCenter(); pvZoomAt(1, cx, cy); };
+$("pvView").addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = $("pvView").getBoundingClientRect();
+  pvZoomAt(pv.z*Math.exp(-e.deltaY*(e.ctrlKey ? 0.01 : 0.0018)), e.clientX - r.left, e.clientY - r.top);
+}, {passive:false});
+$("pvView").addEventListener("dblclick", e => {
+  const r = $("pvView").getBoundingClientRect();
+  if (Math.abs(pv.z - 1) < 0.01) pvFit(); else pvZoomAt(1, e.clientX - r.left, e.clientY - r.top);
+});
+let pvDrag = null;
+$("pvView").addEventListener("pointerdown", e => { pvDrag = {px:e.clientX, py:e.clientY, x:pv.x, y:pv.y}; $("pvView").setPointerCapture(e.pointerId); $("pvView").classList.add("drag"); });
+$("pvView").addEventListener("pointermove", e => { if (!pvDrag) return; pv.x = pvDrag.x + e.clientX - pvDrag.px; pv.y = pvDrag.y + e.clientY - pvDrag.py; pvApply(); });
+["pointerup","pointercancel"].forEach(t => $("pvView").addEventListener(t, () => { pvDrag = null; $("pvView").classList.remove("drag"); }));
+window.addEventListener("keydown", e => {
+  if ($("pv").hidden) return;
+  if (e.key === "+" || e.key === "=") $("pvIn").click();
+  else if (e.key === "-" || e.key === "_") $("pvOut").click();
+  else if (e.key === "0") pvFit();
+  else if (e.key === "1") $("pv100").click();
+});
+window.addEventListener("resize", () => { if (!$("pv").hidden && pv.fitMode) pvFit(); });
 
 /* ---------- start ---------- */
 syncUI();
