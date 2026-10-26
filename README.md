@@ -1,19 +1,105 @@
-# Banner Forge
+<p align="center">
+  <img src="icon/icon-512.png" alt="Banner Forge logo" width="120" height="120">
+</p>
 
-Turn any website screenshot into a project banner (dark background, text on the left, browser-framed screenshot on the right). Everything runs in your browser: no server, no build step, nothing is uploaded.
+<h1 align="center">Banner Forge</h1>
 
-## Use it
+<p align="center">
+  Turn any website screenshot into a polished project banner.<br>
+  Runs entirely in your browser: no server, no build step, nothing is uploaded.
+</p>
 
-1. Open `index.html` (or your deployed GitHub Pages link).
-2. Click, drop or paste (Ctrl/Cmd+V) a screenshot.
-3. Edit the label, title, description, tags and footer.
-4. Pick colors (or a preset), move the glow, change the window size and rotation. Drag the browser window directly on the preview to move it.
-5. Choose a canvas size and export resolution, then click **Download PNG**.
+Banner Forge makes banners like the ones on portfolio project cards: a dark background with a soft glow, your text on the left (label, title, description, tags, footer) and your screenshot inside a browser window on the right.
 
-Tips:
-- Use a tall page screenshot and the **Image scroll down** slider to choose which part shows.
-- Export at 2x for a sharp result.
-- **Save settings** downloads a JSON file; **Load settings** restores it, so you can make the same style for another project in seconds.
+## Quick start
+
+1. Open `index.html`, or your deployed GitHub Pages link.
+2. Add a screenshot of your site.
+3. Edit the text, colors and layout.
+4. Click **Download PNG**.
+
+## Tutorial: make your first banner
+
+### 1. Take a good screenshot
+
+- Capture the top part of your page (the hero section) rather than the whole page. A tall full-page capture works too, since you choose which part shows later.
+- A desktop-width screenshot (1200 px wide or more) looks best. Phone-width screenshots will look stretched inside the browser window.
+
+### 2. Add it to Banner Forge
+
+Use any of these:
+- Click the dashed box under **Screenshot** and choose the file.
+- Drag and drop the image anywhere on the page.
+- Copy the image and paste it with Ctrl/Cmd+V.
+
+To swap it for another image later, just add a new one. **Remove screenshot** clears it.
+
+### 3. Write your text
+
+Open the **Text** section:
+
+| Field | What it does |
+| --- | --- |
+| Label | Small colored line on top. Always shown in uppercase, for example `WEB APP / ANIME STREAMING`. |
+| Title | The big heading. Press Enter for a line break. |
+| Description | One or two sentences about the project. It wraps automatically. |
+| Tags | Comma separated, for example `JavaScript, REST API, Responsive UI`. Each becomes a pill. |
+| Footer | Small text at the bottom left, such as your website. |
+
+Leave a field empty to hide it.
+
+### 4. Choose colors
+
+Open **Colors**:
+- Click a preset (Violet, Ember, Ocean, Forest, Rose or Light) for a quick start.
+- Then fine tune any color with the pickers: background, accent (label, left bar, line under the window bar), title, description, and the tag fill, border and text.
+- To match your site, set the accent to your brand color, then set the glow color in **Background** to the same one.
+
+### 5. Position the screenshot
+
+- **Drag the browser window** directly on the preview to move it.
+- Open **Screenshot window** for exact control: left and top position, width and height, rotation, image zoom, and the two shift sliders.
+- Use **Image scroll down** to pick which part of a tall screenshot shows, and **Image zoom** to enlarge details.
+- It looks best when the window runs off the right edge of the banner, so set the width a bit larger than the space left.
+
+### 6. Style the window and background
+
+- **Window frame**: turn the browser bar on or off, show an address bar with your own text, switch to colored window dots, set the corner radius and shadow, and add or remove the accent line.
+- **Background**: move the glow (X and Y), change its size and strength, turn the faint grid on or off, and show or hide the colored bar on the left edge.
+- **Typography** and **Text position**: change the font, title weight, sizes and where the text block sits.
+
+### 7. Pick a size and export
+
+Open **Output**:
+- **Canvas size**: 1200 × 630 for Open Graph and social previews, 1280 × 640 for the GitHub social preview, 1200 × 675 for Twitter/X cards, 1500 × 500 for an X header, 1584 × 396 for a LinkedIn banner, 1920 × 1080 for Full HD, or square.
+- **Export resolution**: 2x gives the sharpest result and is a good default.
+
+Then use the buttons at the top:
+- **Download PNG** or **Download JPG** saves the file.
+- **Copy PNG** copies the banner to your clipboard.
+
+When you change the canvas size, the text scale adjusts automatically. Check the layout afterwards, since wide or square sizes may need the window and text positions nudged.
+
+### 8. Reuse your style
+
+- **Save settings** downloads a small JSON file of everything you set (not the screenshot).
+- **Load settings** restores it, so you can make a matching banner for another project in seconds.
+- **Reset** returns everything to the defaults.
+- Your settings are also remembered in your browser automatically.
+
+## Tips
+
+- Keep the title short. One or two words look best at the default size.
+- Keep text away from the busiest part of the screenshot.
+- Use the same accent and glow color as your site so the banner looks like part of the project.
+- To use the banner as a GitHub social preview, export at 1280 × 640 and upload it under the repository's Settings.
+
+## Troubleshooting
+
+- **The text uses a plain font.** The fonts load from Google Fonts, so they need an internet connection. Offline, system fonts are used.
+- **My screenshot disappeared after refreshing.** Settings are remembered, but the screenshot is not. Add it again.
+- **Copy PNG does not work.** Some browsers block clipboard images. Use Download PNG instead.
+- **The old footer or text keeps showing.** Click **Reset**, or edit the field.
 
 ## Deploy on GitHub Pages
 
@@ -34,9 +120,17 @@ git remote add origin https://github.com/YOUR-USERNAME/banner-forge.git
 git push -u origin main
 ```
 
-Then enable Pages as in step 3 and 4.
+Then enable Pages as in steps 3 and 4.
 
-## Notes
+## Project files
 
-- Fonts (Inter, Poppins, Space Grotesk, DM Sans, Outfit, JetBrains Mono) load from Google Fonts. Offline, it falls back to system fonts.
-- Your settings are remembered in your browser's local storage. The screenshot itself is not stored, so load it again after a refresh.
+```
+index.html     the whole tool (HTML, CSS and JavaScript)
+favicon.ico    browser tab icon
+icon/          logo and icon sizes
+README.md      this file
+```
+
+## Credits
+
+Made by [azif.me](https://azif.me).
