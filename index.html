@@ -207,7 +207,7 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
         <button id="btnClearImg" disabled>Remove screenshot</button>
       </div>
     </details>
-    <div class="foot" id="foot"><span>Banner Forge <button id="footLog" type="button"><span id="footVer"></span></button></span><a href="https://azif.me" target="_blank" rel="noopener">azif.me</a></div>
+    <div class="foot" id="foot"><span>Banner Forge <button id="footLog" type="button"><span id="footVer"></span></button></span><a href="https://github.com/az4if" target="_blank" rel="noopener">AziF</a></div>
   </aside>
 </main>
 <div id="toasts" aria-live="polite"></div>
@@ -219,8 +219,12 @@ input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.18)}
 /* ===== Release version =====
    Bump APP_VERSION (and add a CHANGELOG entry) every time you publish.
    Open pages compare themselves with the deployed index.html and update automatically. */
-const APP_VERSION = "1.0.2";
+const APP_VERSION = "1.0.4";
 const CHANGELOG = [
+  {v:"1.0.4", date:"Oct 2026", notes:[
+    "3D preview now starts at 18\u00b0 turn and 0\u00b0 tilt",
+    "21 color presets (dark and light) plus a Shuffle button",
+    "Footer credit links to AziF on GitHub"]},
   {v:"1.0.2", date:"Oct 2026", notes:[
     "New 3D screenshot preview with turn, tilt, perspective and edge fade",
     "Redesigned interface: orange theme, themed scrollbars, new header and controls",
@@ -248,7 +252,7 @@ const DEFAULTS = {
   glowOn: true, glow: "#7c3aed", glowX: 92, glowY: 8, glowR: 70, glowA: 38,
   gridOn: true, gridSize: 40, gridA: 4,
   barOn: true, barW: 6,
-  view: "2d", rotY: 26, rotX: 3, persp: 70, fade: 30,
+  view: "2d", rotY: 18, rotX: 0, persp: 70, fade: 30,
   geo: {"3d": {winX: 57, winY: 9, winW: 62, winH: 84, rot: 0}},
   winX: 56, winY: 18, winW: 52, winH: 60, rot: 0, zoom: 100, panX: 0, panY: 0,
   frame: true, url: "azif.me", showUrl: false, dotsMac: false,
